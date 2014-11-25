@@ -1,0 +1,8 @@
+<% titulo 'Editar Mencion' %>
+
+<%= render 'form' %>
+
+<%= link_to @mencion, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-search"></i> Ver 
+<% end %>
+

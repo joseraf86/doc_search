@@ -1,0 +1,55 @@
+
+<script>
+function cargar_persona(per_id){
+ $("#doc-info-body").load("/personas/"+per_id+"/datos_persona" , function(response,status,xhr){
+ });
+
+}
+</script>
+
+<% titulo 'Personas' %>
+
+<%= link_to  new_persona_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Persona 
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Cedula</th>
+    <th>Nombre completo</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @personas.each do |persona| %>
+  <tr>
+    <td><%= persona.cedula %></td>
+    <td><%= link_to persona, { :class => 'desc btn-link', :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_persona(#{persona.id})"} do %>
+          <%= "#{persona.nombre_completo}" %>
+        <% end %>
+    </td>
+    <td>
+
+      <%= link_to persona, { :class => 'btn btn-info', :style => "color:white", :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_persona(#{persona.id}), :href => "#"} do %>
+         <i class="icon-white icon-search"></i> Ver 
+      <% end %>
+
+        <%= link_to edit_persona_path(persona), { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to persona, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{persona.nombre_completo} CI:#{persona.cedula}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @personas } %>
+
+<%= render 'shared/modal' %>
+

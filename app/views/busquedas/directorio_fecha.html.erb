@@ -1,0 +1,76 @@
+<script>
+function cargar_documento( doc_id )
+{
+  $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){});
+}
+</script>
+
+<%= render 'menu' %>
+
+<h2><%= @fecha %></h2><br />
+
+<% if @documentos_fecha.any? %>
+<table class="table table-striped tabla">
+  <thead class="head-blue">
+    <tr>
+      <th>Titulo</th>
+      <th>Escuela</th>
+      <th>Tipo</th>
+      <th style="width:20%">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @documentos_fecha.each do |documento| %>
+  <tr>
+    <td>
+	<% if documento.visibilidad.id == 1 %>
+	  <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+            <%= raw documento.titulo %>
+          </a>
+        <% else %>
+	  <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+            <%= raw documento.titulo %>
+          </a>
+        <% end %>
+    </td>
+
+    <td>
+      <%= documento.escuela.descripcion %> 
+    </td>
+
+    <td>
+      <%= documento.tipo_documento.descripcion %> 
+    </td>
+
+    <td>
+      <%= link_to documento, { :class => 'btn btn-info btn-small', :style => "color:white", :'data-toggle' => "modal", 
+	:'data-target' => "#doc-info", :onclick => "cargar_documento( #{documento.id} )", :href => '#'} do %>
+         <i class="icon-white icon-search"></i> Ver 
+      <% end %>
+      <% if documento.visibilidad.descripcion == 'PUBLICO' %>
+        <%= link_to "/documentos/descargar/#{ documento.id}", { :class => 'btn btn-info btn-small', :style => "color:white"} do %> 
+	  <i class="icon-white icon-download"></i> Descargar 
+        <% end %>
+      <% end %>
+    </td>
+  </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<!-- Paginacion -->
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @documentos_fecha } %>
+
+<% else %>
+  <span class="label label-important" > No hay documentos </span><br /><br /><br />
+<% end %>
+
+<br />
+<!-- Back button -->
+<%= link_to '/directorio', { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-arrow-left"></i> Volver 
+<% end %>
+
+<!-- Ventana Modal -->
+<%= render 'shared/modal' %>
+

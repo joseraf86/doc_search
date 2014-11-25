@@ -1,0 +1,353 @@
+<script> 
+
+window.onload = 
+  function () {
+     
+
+     if  (document.getElementById('nombre_completo_autor') != null ) { 
+     document.getElementById('autor').value = document.getElementById('nombre_completo_autor').value;
+     document.getElementById('autor_id').value = document.getElementById('hidden_autor_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_autor2') != null ) { 
+       document.getElementById('autor2').value = document.getElementById('nombre_completo_autor2').value;
+       document.getElementById('autor2_id').value = document.getElementById('hidden_autor2_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_autor3') != null ) { 
+     document.getElementById('autor3').value = document.getElementById('nombre_completo_autor3').value;
+     document.getElementById('autor3_id').value = document.getElementById('hidden_autor3_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_tutor') != null ) { 
+     document.getElementById('tutor').value = document.getElementById('nombre_completo_tutor').value;
+     document.getElementById('tutor_id').value = document.getElementById('hidden_tutor_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_tutor2') != null ) {
+     document.getElementById('tutor2').value = document.getElementById('nombre_completo_tutor2').value;
+     document.getElementById('tutor2_id').value = document.getElementById('hidden_tutor2_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_jurado') != null ) {
+     document.getElementById('jurado').value = document.getElementById('nombre_completo_jurado').value;
+     document.getElementById('jurado_id').value = document.getElementById('hidden_jurado_id').value;
+     };
+
+     if  (document.getElementById('nombre_completo_jurado2') != null ) {
+     document.getElementById('jurado2').value = document.getElementById('nombre_completo_jurado2').value;
+     document.getElementById('jurado2_id').value = document.getElementById('hidden_jurado2_id').value;
+     };
+
+     jsFunction(document.getElementById("documento_tipo_documento_id"));
+};
+
+function jsFunction(obj){
+  //var myselect = document.getElementById("documento_tipo_documento_id");
+  //alert(myselect.options[myselect.selectedIndex].value);
+  var mycalificacion = document.getElementById("documento_calificacion");
+  var mycalificacion_label = document.getElementById("calificacion_label");
+
+  var autor3 = document.getElementById("autor3");
+  var autor3_label = document.getElementById("autor3_label");
+
+  var tutor = document.getElementById("tutor");
+  var tutor_label = document.getElementById("tutor_label");
+
+  var tutor2 = document.getElementById("tutor2");
+  var tutor2_label = document.getElementById("tutor2_label");
+
+  var jurado = document.getElementById("jurado");
+  var jurado_label = document.getElementById("jurado_label");
+
+  var jurado2 = document.getElementById("jurado2");
+  var jurado2_label = document.getElementById("jurado2_label");
+
+  // si el documento es TEG=1 o SEM=2
+  if (obj.value == 1 || obj.value == 2){
+
+    mycalificacion.style.display = "inline";
+    mycalificacion_label.style.display = "inline"; 
+
+    autor3.style.display = "none";
+    autor3_label.style.display = "none"; 
+
+    tutor.style.display = "inline";
+    tutor_label.style.display = "inline"; 
+ 
+    tutor2.style.display = "inline"; 
+    tutor2_label.style.display = "inline"; 
+
+    jurado.style.display = "inline";
+    jurado_label.style.display = "inline"; 
+ 
+    jurado2.style.display = "inline"; 
+    jurado2_label.style.display = "inline"; 
+
+  }else
+  {
+    mycalificacion.style.display = "none";
+    mycalificacion_label.style.display = "none";
+
+    autor3.style.display = "inline";
+    autor3_label.style.display = "inline"; 
+
+    tutor.style.display = "none"; 
+    tutor_label.style.display = "none"; 
+
+    tutor2.style.display = "none"; 
+    tutor2_label.style.display = "none"; 
+
+    jurado.style.display = "none"; 
+    jurado_label.style.display = "none"; 
+
+    jurado2.style.display = "none"; 
+    jurado2_label.style.display = "none"; 
+  }
+}
+
+
+</script>
+
+
+<% unless @autor1.nil? %> 
+  <%= hidden_field_tag :nombre_completo_autor, @autor1.nombre_completo %>
+  <%= hidden_field_tag :hidden_autor_id,       @autor1.id %>
+<% end %>
+
+<% unless @autor2.nil? %> 
+  <%= hidden_field_tag :nombre_completo_autor2,  @autor2.nombre_completo %>
+  <%= hidden_field_tag :hidden_autor2_id,        @autor2.id %>
+<% end %>
+
+<% unless @autor3.nil? %> 
+  <%= hidden_field_tag :nombre_completo_autor3,  @autor3.nombre_completo %>
+  <%= hidden_field_tag :hidden_autor3_id,        @autor3.id %>
+<% end %>
+
+<% unless @tutor1.nil?  %> 
+  <%= hidden_field_tag :nombre_completo_tutor, @tutor1.nombre_completo %>
+  <%= hidden_field_tag :hidden_tutor_id,       @tutor1.id %>
+<% end %>
+
+<% unless @tutor2.nil?  %> 
+  <%= hidden_field_tag :nombre_completo_tutor2,  @tutor2.nombre_completo %>
+  <%= hidden_field_tag :hidden_tutor2_id,        @tutor2.id %>
+<% end %>
+
+<% unless @jurado1.nil?  %> 
+  <%= hidden_field_tag :nombre_completo_jurado,  @jurado1.nombre_completo %>
+  <%= hidden_field_tag :hidden_jurado_id,        @jurado1.id %>
+<% end %>
+
+<% unless @jurado2.nil?  %> 
+  <%= hidden_field_tag :nombre_completo_jurado2,  @jurado2.nombre_completo %>
+  <%= hidden_field_tag :hidden_jurado2_id,        @jurado2.id %>
+<% end %>
+
+<!-- TinyMCE esta en la carpeta publica fuera del pipeline asset -->
+<script type="text/javascript" src="/tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="/tinymce/jquery.tinymce.min.js"></script>
+
+<!-- Configura el TinyMCE (editor del titulo) -->
+<script type="text/javascript">
+tinymce.init({selector:'.mytext',
+              content_css : "/tinymce/mycontent.css",
+              language : "es",
+              plugins: ["charmap"],
+              toolbar1: "bold italic subscript superscript charmap",	
+              menubar: false,
+              toolbar_items_size: 'large'
+             });
+</script>
+
+
+<div id="div-formulario" class="upload_form_cont">
+
+<%= form_for(@documento, :html => {:class => "form_horizontal", :onsubmit => "return startUploading( #{@documento.id} );"}) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @documento } %>
+
+  <%= f.label '(*) campos obligatorios' %>
+
+  <div class="control-group">
+    <%= f.label 'titulo *', :class => "control-label" %>
+    <%= f.text_field :titulo, :autocomplete => "off", :class => "mytext" %>
+  </div>
+
+  <div class="control-group">
+    <%= f.label 'resumen *', :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.text_area :resumen, :style => "width:80%", :rows => "10", :class => "mytext"  %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label 'tipo_documento *', :class => "control-label" %>
+    <%= f.select("tipo_documento_id", TipoDocumento.all.collect {|p| [ p.descripcion_corta, p.id ] },{},{:onchange => "jsFunction(this)"}) %>
+  </div>
+
+  <!-- Autores, tutores, y jurados -->
+  
+  
+  <!-- autores  -->
+    <table border="0px" style="width:1000px">
+    <tr>
+    <td>
+    <div class="control-group <%= error_css(@documento.errors[:persona]) %>" style="display: inline;">
+      <label id="autor_label" class="control-label" style="display: inline;"> Autor *</label>
+      <div class="controls <%= error_css(@documento.errors[:autor]) %>" style="display: inline;">  
+        <input id="autor" type="text" autocomplete="off" data-provide="typeahead" style="width:85%" />
+        <input id="autor_id" name="autor[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+  
+    <td>
+    <div class="control-group" style="display: inline;">
+      <label id="autor2_label"  class="control-label" style="display: inline;"> Autor 2</label>
+      <div class="controls <%= error_css(@documento.errors[:autor]) %>" style="display: inline;">
+        <input id="autor2" type="text" autocomplete="off" data-provide="typeahead" name="autor2_eliminar" style="width:85%" />
+        <input id="autor2_id" name="autor2[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+
+    <table border="0px" style="width:1000px">
+    <tr>
+    <td>
+    <div class="control-group" style="display: inline;">
+      <br/>
+      <label id="autor3_label"  class="control-label" style="display: inline;"> Autor 3</label>
+      <div class="controls <%= error_css(@documento.errors[:autor]) %>" style="display: inline;">
+        <input id="autor3" type="text" autocomplete="off" data-provide="typeahead" name="autor3_eliminar" style="width:42%" />
+        <input id="autor3_id" name="autor3[id]" type="hidden"/>
+      </div>
+    </div>   
+    </td>
+    </tr>
+    </table>
+
+  <!-- tutores  -->
+    <table border="0px" style="width:1000px">
+    <tr>
+    <td>
+    <div class="control-group" style="display: inline;">
+      <label id="tutor_label" class="control-label" style="display: inline;">Tutor *</label>
+      <div class="controls <%= error_css(@documento.errors[:tutor]) %>" style="display: inline;">
+        <input id="tutor" type="text" autocomplete="off" data-provide="typeahead" style="width:85%" />
+        <input id="tutor_id" name="tutor[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+    
+    <td>
+    <div class="control-group" style="display: inline;"> 
+      <label id="tutor2_label" class="control-label" style="display: inline;  width:15%">Tutor 2</label>
+      <div class="controls <%= error_css(@documento.errors[:tutor]) %>" style="display: inline;">
+        <input id="tutor2" type="text" autocomplete="off" data-provide="typeahead" name="tutor2_eliminar" style="width:85%" />
+        <input id="tutor2_id" name="tutor2[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+
+  <br/>
+
+  <!-- jurados  -->
+    <table border="0px" style="width:1000px">
+    <tr>
+    <td>
+    <div class="control-group" style="display: inline;">
+      <label id="jurado_label" class="control-label" style="display: inline; width:15%"> Jurado *</label>
+      <div class="controls <%= error_css(@documento.errors[:jurado]) %>" style="display: inline;">
+        <input id="jurado" type="text" autocomplete="off" data-provide="typeahead" style="width: 80%" />
+        <input id="jurado_id" name="jurado[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+
+    <td>
+    <div class="control-group" style="display: inline;">
+      <label id="jurado2_label" class="control-label" style="display: inline; width:15%"> Jurado 2 *</label>
+      <div class="controls <%= error_css(@documento.errors[:jurado]) %>"  style="display: inline;">
+        <input id="jurado2" type="text" autocomplete="off" data-provide="typeahead" style="width: 80%" />
+        <input id="jurado2_id" name="jurado2[id]" type="hidden"/>
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+  <!-- end  -->
+
+  <br/>
+
+  <div class="control-group">
+    <%= f.label 'fecha_publicacion *', :class => "control-label", :style=>"display: inline;" %>
+    <div class="controls">
+      <%= f.date_select :fecha_publicacion, :use_month_names => ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'], :start_year => 2000, :end_year => Time.now.year %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label 'palabras_clave *', :class => "control-label" %>
+    <div class="controls">
+      <%= f.text_field :palabras_clave %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label 'escuela *', :class => "control-label" %>
+    <%= f.select("escuela_id", Escuela.all.collect {|p| [ p.descripcion, p.id ] }) %>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :areas, :class => "control-label" %>
+    <% for area in Area.find(:all) %>
+      <div class="controls">
+        <%= check_box_tag "documento[area_ids][]", area.id, @documento.areas.include?(area) %>
+        <%= area.descripcion %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="control-group">
+    <label id="calificacion_label" style="display:inline">Calificacion</label><br />
+    <%= f.select("calificacion", (1..20).to_a, :selected => 20, :style => "display:inline")  %>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :reconocimientos, :class => "control-label" %>
+    <% for reconocimiento in Reconocimiento.find(:all) %>
+      <div class="controls">
+        <%= check_box_tag "documento[reconocimiento_ids][]", reconocimiento.id, @documento.reconocimientos.include?(reconocimiento), :placeholder => reconocimiento.descripcion %>
+        <%= reconocimiento.descripcion %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="field">
+    <%= f.label 'idioma *', :class => "control-label" %>
+    <%= f.select("idioma_id", Idioma.all.collect {|p| [ p.descripcion, p.id ] }) %>
+  </div>
+
+  <div class="field">
+    <%= f.label 'visibilidad *', :class => "control-label" %>
+    <%= f.select("visibilidad_id", Visibilidad.all.collect {|p| [ p.descripcion, p.id ] }) %>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to documentos_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+
+<% end %>
+
+
+
+</div>

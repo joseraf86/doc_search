@@ -1,0 +1,36 @@
+<% titulo 'Idiomas' %>
+
+<%= link_to  new_idioma_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Idioma
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Descripcion</th>
+    <th>Codigo</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @idiomas.each do |idioma| %>
+  <tr>
+    <td><p class="desc"><%= idioma.descripcion %></p></td>
+    <td><%= idioma.codigo %></td>
+    <td><!-- <%= link_to idioma, { :class => 'btn btn-info', :style => "color:white"} do %> 
+          <i class="icon-white icon-search"></i> Ver 
+        <% end %> -->
+        <%= link_to edit_idioma_path(idioma), { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to idioma, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{idioma.descripcion}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+

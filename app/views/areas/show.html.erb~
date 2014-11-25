@@ -1,0 +1,22 @@
+<% titulo 'Area' %>
+
+<div class="grid-row" >
+  <div class="labels">Descripcion:</div> 
+  <div class="values"><%=  @area.descripcion %></div> 
+</div>  
+<div class="grid-row" >
+   <div class="labels">Escuela:</div> 
+   <div class="values"><%= @area.escuela.descripcion %></div> 
+</div>
+
+<nav>
+  <%= link_to areas_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_area_path(@area), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>

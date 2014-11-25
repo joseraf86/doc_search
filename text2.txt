@@ -1,0 +1,10 @@
+12950975
+COTO ERNESTO
+algo@servidor.com
+10804242
+CARMONA RHADAMES
+algo@servidor.com
+14746381
+BLANCO JAIME
+algo@servidor.com
+{"id"=>"", "nombre_completo"=>"", "correo"=>""}

@@ -1,0 +1,5 @@
+<% titulo 'Crear Estudiante' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', estudiantes_path %>

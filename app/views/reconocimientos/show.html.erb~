@@ -1,0 +1,18 @@
+<% titulo 'Reconocimiento' %>
+
+<div class="grid-row" >
+  <div class="labels">Descripcion:</div> 
+  <div class="values"><%=  @reconocimiento.descripcion %></div> 
+</div>
+
+<nav>
+  <%= link_to reconocimientos_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_reconocimiento_path(@reconocimiento), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>

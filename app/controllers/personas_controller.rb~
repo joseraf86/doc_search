@@ -1,0 +1,159 @@
+class PersonasController < AdminController
+  include Utilidades
+
+  before_filter :authenticate_usuario!, :except => [:index, :autocompletar_personas]
+
+  PREGRADO = 1
+
+  def autocompletar_personas
+    # Si la solicitud es AJAX
+    if request.xhr?
+      @personas = []
+      case params[:tipo_de_persona]
+        when 'autor'
+          personas = Persona.select("id, nombre_completo").where("nombre_completo LIKE ?", "%#{params[:query]}%")
+          personas.each do |persona|
+            if persona.autors.any?
+              @personas.push(persona)
+            end#if
+          end#do
+        when 'tutor'
+          personas = Persona.select("id, nombre_completo").where("nombre_completo LIKE ?", "%#{params[:query]}%")
+          personas.each do |persona|
+            if persona.tutors.any?
+              @personas.push(persona)
+            end#if
+          end#do
+        when 'jurado'
+          personas = Persona.select("id, nombre_completo").where("nombre_completo LIKE ?", "%#{params[:query]}%")
+          personas.each do |persona|
+            if persona.jurados.any?
+              @personas.push(persona)
+            end#if
+          end#do
+      end#case
+      @personas = {id:'1', nombre_completo:'fulanito'}
+    else
+      @personas = {id:'1', nombre_completo:'fulanito'}
+    end#if
+    respond_to do |format|
+      format.html # autcompletar_personas.html.erb
+      format.json { render json: @personas }
+    end#do
+  end#def
+
+  # GET /personas
+  # GET /personas.json
+  def index
+    # Si la solicitud es AJAX
+    if request.xhr?
+      @personas = []
+      if params[:tipo_de_persona] == 'pre-grado'
+          personas = Persona.find(:all,:conditions => ['nombre_completo LIKE ?', "%#{params[:query]}%"])
+          personas.each do |persona|
+            if persona.estudiantes.any?
+              persona.estudiantes.each do |estudiante|
+                if estudiante.grado.id == PREGRADO
+                  @personas.push(persona)
+                end#if
+              end#do
+            end#if
+          end#do
+          @personas.uniq!
+      else 
+        @personas = Persona.select("id, nombre_completo").where("nombre_completo LIKE ?", "%#{params[:query]}%")
+      end#if
+    # Si la solicitud no es AJAX
+    else
+      @personas = Persona.order("nombre_completo").paginate(:page => params[:page])
+    end#if
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @personas }
+    end#do
+  end#def
+
+  # GET /personas/1
+  # GET /personas/1.json
+  def show
+    @persona = Persona.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @persona }
+    end
+  end
+
+  # GET /personas/new
+  # GET /personas/new.json
+  def new
+    @persona = Persona.new
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @persona }
+    end
+  end
+
+  # GET /personas/1/edit
+  def edit
+    @persona = Persona.find(params[:id])
+  end
+
+  # POST /personas
+  # POST /personas.json
+  def create
+    @persona = Persona.new(params[:persona])
+    @persona.nombre_completo = params[:persona][:nombres] + " " + params[:persona][:apellidos]
+
+    respond_to do |format|
+      if @persona.save
+        format.html { redirect_to @persona, notice: 'Persona creada' }
+        format.json { render json: @persona, status: :created, location: @persona }
+      else
+        format.html { render action: "new" }
+        format.json { render json: @persona.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /personas/1
+  # PUT /personas/1.json
+  def update
+    @persona = Persona.find(params[:id])
+    @persona.nombre_completo = params[:persona][:nombres] + " " + params[:persona][:apellidos]
+
+    respond_to do |format|
+      if @persona.update_attributes(params[:persona])
+        format.html { redirect_to @persona, notice: 'Persona actualizada' }
+        format.json { head :no_content }
+      else
+        format.html { render action: "edit" }
+        format.json { render json: @persona.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /personas/1
+  # DELETE /personas/1.json
+  def destroy
+    @persona = Persona.find(params[:id])
+
+    eliminar_recurso?(@persona) ? notice_msj = "#{@persona.nombre_completo}, #{@persona.cedula} eliminada" : alert_msj = "No se puede eliminar #{@persona.nombre_completo}, #{@persona.cedula}  porque tiene al menos un documento asociado"
+
+    respond_to do |format|
+      format.html { redirect_to personas_url, alert: alert_msj, notice: notice_msj}
+      format.json { head :no_content }
+    end#do
+  end#destroy
+
+  def datos_persona
+    @persona = Persona.find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => !request.xhr? }
+    end
+  end#datos_persona
+
+end#def

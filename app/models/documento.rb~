@@ -1,0 +1,207 @@
+class Documento < ActiveRecord::Base
+
+  TEG       = 1
+  SEMINARIO = 2
+  NUEVO     = 1
+  INDEXADO  = 2
+
+  attr_accessible :fecha_publicacion,
+                  :palabras_clave,
+                  :titulo,
+                  :titulo_texto_plano,
+                  :resumen,
+                  :resumen_texto_plano,
+                  :escuela_id,
+                  :tipo_documento_id, 
+                  :reconocimiento_ids,
+                  :idioma_id,
+                  :visibilidad_id,
+                  :area_ids,
+                  :publicacion,
+                  :calificacion,
+                  :persona,
+                  :descargas,
+                  :paginas,
+                  :estado,
+                  :estado_documento_id
+
+  # 10 documentos por pagina (will_paginate setting)
+  self.per_page = 10
+
+  ## ASOCIACIONES ##
+
+  belongs_to :escuela
+  belongs_to :tipo_documento
+  belongs_to :estado_documento
+  belongs_to :idioma
+  belongs_to :visibilidad
+
+  has_one :contenido, :dependent => :destroy
+
+  has_many :autors, :dependent => :destroy
+  has_many :personas_autor, :through => :autors, :source => :persona
+
+  has_many :tutors, :dependent => :destroy
+  has_many :personas_tutor, :through => :tutors, :source => :persona
+
+  has_many :jurados, :dependent => :destroy
+  has_many :personas_jurado, :through => :jurados, :source => :persona
+
+  # Asociaciones   Indice Invertido
+  # Contenido       cindices
+  # Titulo          tindices
+  # Resumen         rindices
+  # Palabras clave  clindices
+  #
+  has_many :cindices, :dependent => :destroy
+  has_many :terminos_contenido, :through => :cindices, :source => :termino
+
+  has_many :tindices, :dependent => :destroy
+  has_many :terminos_titulo, :through => :tindices, :source => :termino
+
+  has_many :rindices, :dependent => :destroy
+  has_many :terminos_resumen, :through => :rindices, :source => :termino
+
+  has_many :clindices, :dependent => :destroy
+  has_many :terminos_palabras_clave, :through => :clindices, :source => :termino
+
+  has_and_belongs_to_many :reconocimientos
+  has_and_belongs_to_many :areas
+
+  # Asociacion requerida por Paperclip
+  Paperclip.interpolates :fecha do |attachment, style|
+    attachment.instance.fecha_publicacion.year
+  end
+
+  Paperclip.interpolates :escuela do |attachment, style|
+    attachment.instance.escuela.descripcion
+  end
+
+  Paperclip.interpolates :documento_id do |attachment, style|
+    attachment.instance.id
+  end
+
+  has_attached_file :publicacion,
+                    :path => ':rails_root/documentos/:escuela/:fecha/documento_:documento_id.:extension',
+                    #:url  => ':rails_root/documentos/:fecha/:escuela/documento_:documento_id.:extension',
+                    #:styles => { :medium => "300x300>", :thumb => "100x100>" },
+                    :content_type => { :content_type => "application/pdf" },
+                    :size => { :in => 0..200.megabytes },
+                    :default_url => '/img/missing.png'
+
+  ## VALIDACIONES ##
+
+  validates :titulo, :length => { :in => 1..4294967295 } # (2^32)-1
+  validates :titulo_texto_plano, :length => { :in => 1..4294967295 } # (2^32)-1
+  validates :resumen, :length => { :minimum => 1 }
+  validates :resumen_texto_plano, :length => { :minimum => 1 }  
+  validates :palabras_clave, :length => { :in => 1..255 } 
+            
+
+  validates :fecha_publicacion,
+            :calificacion,
+            :escuela_id,
+            :tipo_documento_id,
+            :estado_documento_id,
+            :idioma_id,
+            :visibilidad_id,
+            :presence => true
+
+  validates_attachment :publicacion,
+                       :content_type => { :content_type => "application/pdf" },
+                       :size => { :in => 0..50.megabytes }
+
+  #validates_attachment :publicacion, :presence => true
+
+  validate :numero_personas_documento_evaluado, :if => "tipo_documento_id == #{TEG} || tipo_documento_id == #{SEMINARIO}" 
+  def numero_personas_documento_evaluado 
+    errors.add(:autor, "Debe  haber 1 o 2 autores")  unless personas_autor.size.between?(1,2)
+    errors.add(:tutor, "Debe  haber 1 o 2 tutores")  unless personas_tutor.size.between?(1,2)
+    errors.add(:jurado, "Debe  haber 2 jurados")     unless personas_jurado.size == 2
+  end#def
+
+  validate :personas_distintas_documento_evaluado, :if => "tipo_documento_id == #{TEG} || tipo_documento_id == #{SEMINARIO}" 
+  def personas_distintas_documento_evaluado
+
+    if personas_autor.size == 1 && !personas_autor.nil?
+      autores = [personas_autor.first.id]
+    elsif personas_autor.size == 2 
+      autores = [personas_autor.first.id, personas_autor.second.id]
+    end#if
+
+    if personas_tutor.size == 1 && !personas_tutor.nil?
+      tutores = [personas_tutor.first.id]
+    elsif personas_tutor.size == 2 
+      tutores = [personas_tutor.first.id, personas_tutor.second.id]
+    end#if
+  
+    if personas_jurado.size == 1 && !personas_jurado.nil?
+      jurados = [personas_jurado.first.id]
+    elsif personas_jurado.size == 2 
+      jurados = [personas_jurado.first.id, personas_jurado.second.id]
+    end#if
+    
+    if personas_autor.any? && personas_tutor.any? && personas_jurado.any? 
+      puts autores.inspect, tutores.inspect, tutores.inspect
+      personas = autores + tutores + jurados
+      if personas.length != personas.uniq.length
+        errors.add(:persona, "todos los autores, los tutores y los jurados deben ser distintos entre si")
+      end#if
+    end#if
+  end#def
+
+  validate :numero_personas_documento_general, :unless => "tipo_documento_id == #{TEG} || tipo_documento_id == #{SEMINARIO}" 
+  def numero_personas_documento_general 
+    errors.add(:autor, "Debe  haber de 1 a 3 autores")  unless personas_autor.size.between?(1,3)
+    errors.add(:tutor, "No debe haber tutores")        unless personas_tutor.size == 0
+    errors.add(:jurado, "No debe  haber jurados")       unless personas_jurado.size == 0
+  end#def
+
+  validate :personas_distintas_documento_general, :unless => "tipo_documento_id == #{TEG} || tipo_documento_id == #{SEMINARIO}" 
+  def personas_distintas_documento_general
+
+    autores = []
+    if personas_autor.size == 1 
+      autores = [personas_autor.first.id]
+    elsif personas_autor.size == 2
+      autores = [personas_autor.first.id, personas_autor.second.id]
+    elsif personas_autor.size == 3
+      autores = [personas_autor.first.id, personas_autor.second.id, personas_autor.third.id]
+    end#if
+
+    if autores.any?
+      if autores.length != autores.uniq.length
+        errors.add(:persona, "todos los autores deben ser distintos entre si")
+      end#if
+    end#if
+  end#def
+  
+  ## TAREAS NO INTERACTIVAS ##
+
+  # Indexar  por lotes todos los documentos 
+  # con estado NUEVO y COMPLETO (con documento PDF asociado)
+  #
+  def self.indexar_todo
+    documentos = Documento.where("estado_documento_id = \'#{NUEVO}\' AND estado like 'COMPLETO'")
+    documentos.each do |documento|
+      # almacenar el nuevo contenido en la BB.DD.
+      documento.build_contenido
+      documento.contenido.texto = Utilidades::extraer_texto(documento.publicacion.path)
+      documento.contenido.save
+      # llenar los indices del buscador
+      Utilidades::llenar_tindex(documento)
+      Utilidades::llenar_cindex(documento)
+      Utilidades::llenar_rindex(documento)
+      Utilidades::llenar_clindex(documento)
+
+      documento.estado_documento_id = INDEXADO
+      documento.save
+      puts "#{documento.titulo} #{documento.estado_documento.descripcion}"
+    end
+    puts "INDEXACION COMPLETADA EXITOSAMENTE"
+    puts "#{documentos.size} "\
+         "#{ApplicationController.helpers.pluralizar("\
+         "'documento nuevo fue indexado',"\
+         "'documentos nuevos fueron indexados', documentos.size)}"
+  end
+end

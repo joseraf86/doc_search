@@ -1,0 +1,26 @@
+<%= form_for(@mencion) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @mencion } %>'
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%", :rows => "4"  %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :escuela, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.select("escuela_id", Escuela.all.collect {|p| [ p.descripcion, p.id ] }) %>
+    </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to mencions_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+
+<% end %>

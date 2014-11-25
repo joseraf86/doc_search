@@ -1,0 +1,39 @@
+<% titulo 'Tipos de Documentos' %>
+
+<%= link_to  new_tipo_documento_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Tipo de Documento 
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Descripcion</th>
+    <th>Descripcion corta</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @tipo_documentos.each do |tipo_documento| %>
+  <tr>
+    <td><p class="desc"><%= tipo_documento.descripcion %></p></td>
+    <td><%= tipo_documento.descripcion_corta %></td>
+    <td><!-- <%= link_to tipo_documento, { :class => 'btn btn-info', :style => "color:white"} do %> 
+          <i class="icon-white icon-search"></i> Ver 
+        <% end %> -->
+        <%= link_to edit_tipo_documento_path(tipo_documento), { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to tipo_documento, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{tipo_documento.descripcion}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+  </tr>
+<% end %>
+ </tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @tipo_documentos } %>
+
+<%= render 'shared/modal' %>

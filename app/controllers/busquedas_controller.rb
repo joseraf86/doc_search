@@ -1,0 +1,353 @@
+class BusquedasController < ApplicationController
+  include Utilidades
+
+  NUEVO    = 1 
+  INDEXADO = 2
+
+  # Escuelas
+  BIOLOGIA    = 1
+  COMPUTACION = 2
+  FISICA      = 3
+  GEOQUIMICA  = 4
+  MATEMATICA  = 5
+  QUIMICA     = 6
+
+  #Paginacion
+  PER_PAGE    = 10
+
+
+  def busqueda_simple
+    @relevancia = true
+    # Si los parametros del formulario vienen correctamente
+    if params.has_key?(:terminos) && !params[:terminos].nil? && !params[:busqueda].nil?
+      @terminos = params[:terminos].split(/\W+|\s+/).reject{ |e| e.empty? }
+
+      # Si los terminos ingresados por el usuario se 
+      # enencuentran en al menos un documento
+      #
+      var = false
+      Idioma.all.each do |idioma|
+        var = var || hay_algun_documento_indexado?(@terminos, idioma.id)
+      end#end
+
+      if var
+        consulta = recuperar_documentos(@terminos)
+        # agrupar el resultado de la consulta por documentos
+        documentos = consulta.to_a.group_by { |relacion| relacion[0] }
+
+        if params[:busqueda][:tipo] == 'fecha'
+          @fecha = true
+          @calificacion = false
+          @relevancia = false
+          # ordenar documentos por fecha de mas reciente a mas antigua
+          tmp_docs = ((documentos.sort_by { |doc_id,doc| doc.first.third }).reverse).uniq
+          @documentos_size = tmp_docs.size
+          @documentos = tmp_docs.paginate(:page => params[:page], :per_page => PER_PAGE)
+
+        elsif params[:busqueda][:tipo] == 'calificacion'
+          @fecha = false
+          @calificacion = true
+          @relevancia = false
+          clausula_where = []
+          # ordenar documentos de mayor calificacion a menor calificacion
+          clausula_where_OR = []
+          @terminos.each do |termino|
+            term = Termino.find_by_descripcion(termino)
+            unless term.nil?
+              clausula_where_OR.push("(termino.id = #{term.id})")
+            end#unless
+          end#do
+          clausula_where_OR = clausula_where_OR.join(' OR ')
+          @documentos_c = Documento.joins(:terminos_titulo).where("calificacion > 0 AND (#{clausula_where_OR})")
+          @documentos_c = @documentos_c + Documento.joins(:terminos_contenido).where("calificacion > 0 AND (#{clausula_where_OR})")
+          @documentos_c = @documentos_c + Documento.joins(:terminos_resumen).where("calificacion > 0 AND (#{clausula_where_OR})")
+          @documentos_c = @documentos_c + Documento.joins(:terminos_palabras_clave).where("calificacion > 0 AND (#{clausula_where_OR})")
+          tmp_docs = ((@documentos_c.sort_by{ |documento| [documento.calificacion, documento.fecha_publicacion]}).reverse).uniq
+          @documentos_c_size = tmp_docs.size
+          @documentos_c = tmp_docs.paginate(:page => params[:page], :per_page => PER_PAGE)
+          
+        elsif params[:busqueda][:tipo] == 'relevancia'
+          @fecha = false
+          @calificacion = false
+          @relevancia = true
+          docs = ordenar_por_frecuencia(documentos)
+
+          @relevancia_valores = Hash.new 0
+          docs.each do |k,v|
+            doc = Documento.find(k)
+            @relevancia_valores[k] = [{:f_termino => v[0][9]}, {:descargas => doc.descargas}, {:calificacion => doc.calificacion}, {:fecha_publicacion => doc.fecha_publicacion}]
+          end#do
+          @relevancia_valores = relevancia(@relevancia_valores)
+          # Llenar el arreglo para el will_paginate
+          @doc_ids = []
+          @tmp_doc_ids = [] 
+          @relevancia_valores.each do |k,v|
+            @doc_ids.push("(id = #{k})")
+            @tmp_doc_ids.push(k) 
+          end#do
+          @doc_ids = @doc_ids.join(' OR ')
+          @relevancia_v = Documento.where(@doc_ids)
+          tmp_docs = (@relevancia_v.sort_by {|x| @tmp_doc_ids.index(x.id)}).uniq
+          @relevancia_v_size = @relevancia_v.size
+          @relevancia_v = tmp_docs.paginate(:page => params[:page], :per_page => PER_PAGE)
+        end#if
+
+      else # si el usuario no ingreso ningun termino
+        if @terminos.size == 0
+          @ingresar_terminos = 'Ingrese algun termino'
+        else
+          @ingresar_terminos = 'No hay ningun documento asociado, ingrese otros terminos'
+        end#if
+      end#if
+
+    else # Si los parametros del formulario fueron incorrectos
+      @terminos = []
+      @relevancia = true
+    end#if
+
+    respond_to do |format|
+      format.html { render action: 'busqueda_simple' }
+      format.json { render json: @documentos }
+    end#do
+  end#def
+
+  def directorio_escuela
+    escuelas_hash = {'BIOLOGIA' => 1, 'COMPUTACION' => 2, 'FISICA' => 3, 'GEOQUIMICA' => 4, 'MATEMATICA'=>5, 'QUIMICA' => 6}
+    @escuela = params[:escuela].upcase
+    @documentos_escuela = Documento.where('escuela_id = ? AND estado_documento_id = ?', escuelas_hash[@escuela], INDEXADO ).order('fecha_publicacion DESC').paginate(:page => params[:page])
+  end#def
+
+  def directorio_tipo 
+    tipo_doc = TipoDocumento.find_by_descripcion_corta( params[:tipo] )
+    @tipo = tipo_doc.descripcion
+    @documentos_tipo = Documento.where("tipo_documento_id = ? AND estado_documento_id = ?", tipo_doc.id, INDEXADO ).order('fecha_publicacion DESC').paginate(:page => params[:page])
+  end#def
+
+  def directorio_fecha
+    @fecha = params[:fecha]
+    fecha_inicio = params[:fecha]+'/01/01'
+    fecha_fin    = (fecha_inicio.to_date + 1.year).strftime("%Y/%m/%d")
+    @documentos_fecha = Documento.where("fecha_publicacion >= ? AND fecha_publicacion < ? AND estado_documento_id = ?", fecha_inicio, fecha_fin, INDEXADO).order('fecha_publicacion DESC').paginate(:page => params[:page])
+  end#def
+
+  def busqueda_avanzada
+    @documentos = nil
+    clausula_where = []
+    autor_flag = tutor_flag = jurado_flag = false
+    terminos_titulo_flag = terminos_contenido_flag = terminos_resumen_flag = terminos_palabras_clave_flag = false
+    reconocimientos_flag = escuela_flag = idioma_flag = tipo_documento_flag = false
+    fecha_flag = false
+
+    if params[:autor_id] != '' && params.has_key?(:autor_id)
+      autor_flag = true
+    end#if
+    if params[:tutor_id] != '' && params.has_key?(:tutor_id)
+      tutor_flag = true
+    end#if
+    if params[:jurado_id] != '' && params.has_key?(:jurado_id)
+      jurado_flag = true
+    end#if
+    if params[:terminos_titulo] != '' && params.has_key?(:terminos_titulo)
+      terminos_titulo_flag = true
+    end#if
+    if params[:terminos_contenido] != '' && params.has_key?(:terminos_contenido)
+      terminos_contenido_flag = true
+    end#if
+    if params[:terminos_resumen] != '' && params.has_key?(:terminos_resumen)
+      terminos_resumen_flag = true
+    end#if
+    if params[:terminos_palabras_clave] != '' && params.has_key?(:terminos_palabras_clave)
+      terminos_palabras_clave_flag = true
+    end#if
+    unless params[:doc].nil?
+      if params[:doc][:tipo] != '' &&  params.has_key?(:doc)
+        tipo_documento_flag = true
+      end#if
+      if params[:doc][:idioma] != '' && params.has_key?(:doc)
+        idioma_flag = true
+      end#if
+      if params[:doc][:escuela] != '' && params.has_key?(:doc)
+        escuela_flag = true
+      end#if
+    end#unless
+    if params.has_key?(:reconocimientos)
+      reconocimientos_flag = true
+    end#if
+    if params.has_key?(:fecha)
+      if params[:fecha][:'desde(1i)'] != "" || params[:fecha][:'hasta(1i)'] != ""
+      fecha_flag = true
+      end#if
+    end#if
+    @documentos = Documento
+
+    if  autor_flag
+      clausula_where.push("autor.persona_id = #{ActiveRecord::Base::sanitize(params[:autor_id])}")
+      @documentos = @documentos.joins(:personas_autor)
+    end#if
+
+    if tutor_flag
+      clausula_where.push("tutor.persona_id = #{ActiveRecord::Base::sanitize(params[:tutor_id])}")
+      @documentos = @documentos.joins(:personas_tutor)
+    end#if
+
+    if jurado_flag
+      clausula_where.push("jurado.persona_id = #{ActiveRecord::Base::sanitize(params[:jurado_id])}")
+      @documentos = @documentos.joins(:personas_jurado)
+    end#if
+
+    if terminos_titulo_flag
+      terminos = params[:terminos_titulo].split(/\W+|\s+/).reject{ |e| e.empty? }
+      clausula_where_OR = []
+      terminos.each do |termino|
+        if idioma_flag
+          term = Termino.find_by_descripcion_and_idioma_id(termino, params[:doc][:idioma])
+          unless term.nil?
+            clausula_where_OR.push("(tindex.termino_id = #{term.id})")
+          end#unless
+        else
+          terminos_aux = Termino.find_all_by_descripcion(termino)
+          terminos_aux.each do |term|
+            clausula_where_OR.push("(tindex.termino_id = #{term.id})")
+          end#do
+        end#if
+      end#do
+      clausula_where_OR = clausula_where_OR.join(' OR ')
+      unless clausula_where_OR == ''
+        clausula_where.push(clausula_where_OR)
+        @documentos = @documentos.joins(:terminos_titulo)
+        @documentos = @documentos.where(clausula_where)
+      end#unless
+    end#if
+
+    if terminos_resumen_flag
+      terminos = params[:terminos_resumen].split(/\W+|\s+/).reject{ |e| e.empty? }
+      clausula_where_OR = []
+      terminos.each do |termino|
+        if idioma_flag
+          term = Termino.find_by_descripcion_and_idioma_id(termino, params[:doc][:idioma])
+          unless term.nil?
+            clausula_where_OR.push("(rindex.termino_id = #{term.id})")
+          end#unless
+        else
+          terminos_aux = Termino.find_all_by_descripcion(termino)
+          terminos_aux.each do |term|
+            clausula_where_OR.push("(rindex.termino_id = #{term.id})")
+          end#do
+        end#if
+      end#do
+      clausula_where_OR = clausula_where_OR.join(' OR ')
+      unless clausula_where_OR == ''
+        clausula_where.push(clausula_where_OR)
+        @documentos = @documentos.joins(:terminos_resumen)
+        @documentos = @documentos.where(clausula_where)
+      end
+
+    end#if
+
+    if terminos_contenido_flag
+      terminos = params[:terminos_contenido].split(/\W+|\s+/).reject{ |e| e.empty? }
+      clausula_where_OR = []
+      terminos.each do |termino|
+        if idioma_flag
+          term = Termino.find_by_descripcion_and_idioma_id(termino, params[:doc][:idioma])
+          unless term.nil?
+            clausula_where_OR.push("(cindex.termino_id = #{term.id})")
+          end#unless
+        else
+            terminos_aux = Termino.find_all_by_descripcion(termino)
+            terminos_aux.each do |term|
+              clausula_where_OR.push("(cindex.termino_id = #{term.id})")
+            end#do
+        end#if
+      end#do
+
+      clausula_where_OR = clausula_where_OR.join(' OR ')
+      unless clausula_where_OR == ''
+        clausula_where.push(clausula_where_OR)
+        @documentos = @documentos.joins(:terminos_contenido)
+        @documentos = @documentos.where(clausula_where)
+      end
+      
+    end#if
+
+    if terminos_palabras_clave_flag
+      terminos = params[:terminos_palabras_clave].split(/\W+|\s+/).reject{ |e| e.empty? }
+      clausula_where_OR = []
+      terminos.each do |termino|
+        if idioma_flag
+          term = Termino.find_by_descripcion(termino, params[:doc][:idioma])
+          unless term.nil?
+            clausula_where_OR.push("(clindex.termino_id = #{term.id})")
+          end#unless
+        else
+          terminos_aux = Termino.find_all_by_descripcion(termino)
+          terminos_aux.each do |term|
+            clausula_where_OR.push("(clindex.termino_id = #{term.id})")
+          end#do
+        end#if
+      end#do
+      clausula_where_OR = clausula_where_OR.join(' OR ')
+      unless clausula_where_OR == ''
+        clausula_where.push(clausula_where_OR)
+        @documentos = @documentos.joins(:terminos_palabras_clave)
+        @documentos = @documentos.where(clausula_where)
+      end
+
+    end#if
+
+    if  tipo_documento_flag
+      clausula_where.push("documento.tipo_documento_id = #{ActiveRecord::Base::sanitize(params[:doc][:tipo])}")
+    end#if
+
+    if  idioma_flag
+      clausula_where.push("documento.idioma_id = #{ActiveRecord::Base::sanitize(params[:doc][:idioma])}")
+    end#if
+
+    if  escuela_flag
+      clausula_where.push("documento.escuela_id = #{ActiveRecord::Base::sanitize(params[:doc][:escuela])}")
+    end#if
+
+    if reconocimientos_flag
+      @documentos = @documentos.joins(:reconocimientos)
+    end#if
+    
+    if params.has_key?(:fecha)
+      desde = params[:fecha][:'desde(1i)']
+      hasta = params[:fecha][:'hasta(1i)']
+      if desde != '' && hasta == ''
+        clausula_where.push("documento.fecha_publicacion BETWEEN '#{desde}-01-01' AND '#{Time.now.year}-#{Time.now.month}-#{Time.now.day}'")
+      elsif desde == '' && hasta != ''
+        clausula_where.push("documento.fecha_publicacion < '#{hasta.to_i+1}-01-01'")
+      elsif desde != '' &&  hasta != '' && desde <= hasta 
+        clausula_where.push("documento.fecha_publicacion BETWEEN '#{desde}-01-01' AND '#{hasta}-12-31'")
+      end#if
+    end#if
+
+
+    #Ejecucion
+    if reconocimientos_flag || escuela_flag || idioma_flag || tipo_documento_flag || terminos_titulo_flag || terminos_contenido_flag || terminos_resumen_flag || terminos_palabras_clave_flag || autor_flag || tutor_flag || jurado_flag || fecha_flag
+      clausula_where.push("estado_documento_id = #{INDEXADO}")
+      unless clausula_where.size == 1
+        #clausula_where.push("(#{aux_clause.join( ' OR ')})") if aux_clause.any?
+        clausula_where = clausula_where.join(' AND ')
+        #@query0 = clausula_where
+        tmp_docs = @documentos.where(clausula_where).order('fecha_publicacion DESC').uniq
+        #@documentos_size = @documentos.size
+        @documentos = tmp_docs.paginate(:page => params[:page])
+
+        @documentos_query = @documentos.explain
+      else
+        @documentos = nil
+      end
+      
+      
+      unless @documentos.nil? || @documentos.any?
+        @ingresar_terminos = 'No hay ningun resultado, ingrese mas datos'
+      end#if
+    else
+      @documentos = nil
+    end#if
+  end#def
+
+
+end#class

@@ -1,0 +1,18 @@
+<%= form_for(@premio, :html => {:class => "form_horizontal"}) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @premio } %>'
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%", :maxlenght => "255"  %>
+    </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to premios_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+<% end %>

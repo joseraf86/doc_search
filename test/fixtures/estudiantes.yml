@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  promedio_general: 1.5
+  promedio_ponderado: 1.5
+  eficiencia: 1.5
+  escuela: 
+  grado: 
+  persona: 
+
+two:
+  promedio_general: 1.5
+  promedio_ponderado: 1.5
+  eficiencia: 1.5
+  escuela: 
+  grado: 
+  persona: 

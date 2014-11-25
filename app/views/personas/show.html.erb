@@ -1,0 +1,41 @@
+<% titulo 'Persona' %>
+
+<div class="grid-row" >
+  <div class="labels">Cedula:</div> 
+  <div class="values"><%=  @persona.cedula %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Nombres:</div> 
+  <div class="values"><%=  @persona.nombres %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Apellidos:</div> 
+  <div class="values"><%=  @persona.apellidos %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Nombre Completo:</div> 
+  <div class="values"><%=  @persona.nombre_completo %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Email:</div> 
+  <div class="values"><%=  @persona.email %></div> 
+</div>
+
+<br />
+
+<nav>
+  <%= link_to personas_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_persona_path(@persona), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>
+

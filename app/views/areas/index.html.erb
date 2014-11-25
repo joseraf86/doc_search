@@ -1,0 +1,36 @@
+<% titulo 'Areas' %>
+
+<%= link_to  new_area_path, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-plus"></i> Crear Area 
+<% end %>
+
+<br /><br />
+<table class="table table-striped tabla" style="">
+ <thead class="head-blue"> 
+  <tr>
+    <th>DESCRIPCION</th>
+    <th>ESCUELA</th>
+    <th colspan="3" width="30%">ACCIONES</th>
+  </tr>
+ </thead>
+ <tbody>
+<% @areas.each do |area| %>
+  <tr>
+    <td><p class="desc"><%= area.descripcion %></b></td>
+    <td><%= area.escuela.descripcion %></td>
+    <td colspan="3" style="text-align:center;">
+ <!--   <%= link_to area, { :class => 'btn btn-info', :style => "color:white"} do %> <i class="icon-white icon-search"></i> Ver <% end %> -->
+     <%= link_to edit_area_path(area), { :class => 'btn btn-info', :style => "color:white"} do %> <i class="icon-white icon-edit"></i> Editar <% end %>
+     <%= link_to area, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	data: { confirm: "¿Estas seguro que quieres eliminar #{area.descripcion}?"} } do %> <i class="icon-white icon-remove"></i>
+	Eliminar <% end %> 
+    </td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @areas } %>
+
+<%= render 'shared/modal' %>
+

@@ -1,0 +1,89 @@
+## LISTA DE COMANDOS GENERATE ##
+
+## SCAFFOLDS ##
+
+# TIPO_DOCUMENTO TEG, seminario, pasantía, paper, notas de docencia, guía de ejercicios resueltos, etc
+rails g scaffold TipoDocumento descripcion:string descripcion_corta:string
+
+# IDIOMA Idioma del documento
+rails g scaffold Idioma descripcion:string codigo:string
+
+# RECONOCIMIENTO
+rails g scaffold Reconocimiento descripcion:string
+
+# DOCUMENTO 
+rails g scaffold Documento titulo:string calificacion:integer resumen:text fecha_publicacion:date palabras_clave:string escuela:references tipo_documento:references estado_documento:references idioma:references visibilidad:references
+
+# PERSONA 
+rails g scaffold Persona cedula:string nombres:string apellidos:string nombre_completo:string email:string
+
+# ESTUDIANTE 
+rails g scaffold Estudiante promedio_general:decimal promedio_ponderado:decimal eficiencia:decimal escuela:references grado:references persona:references mencion:references premio:references
+
+# MENCION
+rails g scaffold Mencion descripcion:string escuela:references
+
+# AREA
+rails g scaffold Area descripcion:string escuela:references
+
+# PREMIO
+rails g scaffold Premio descripcion:string
+
+## MODELS ##
+
+# VISIBILIDAD público o privado
+rails g model Visibilidad descripcion:string
+
+#ESTADO_DOCUMENTO nuevo, indexado
+rails g model EstadoDocumento descripcion:string
+
+# ESCUELA química, matemática, biología, computación, geoquímica, física
+rails g model Escuela descripcion:string
+
+# GRADO pregrado o postgrado
+rails g model Grado descripcion:string
+
+# AUTOR
+rails g model Autor persona:references documento:references
+
+# TUTOR
+rails g model Tutor persona:references documento:references
+
+# JURADO
+rails g model Jurado persona:references documento:references
+
+# TERMINO
+rails g model Termino descripcion:string idioma:references
+
+# CINDEX Indice por contenido
+rails g model Cindex ocurrencia:integer documento:references termino:references
+
+# TINDEX Indice por titulo
+rails g model Tindex ocurrencia:integer documento:references termino:references
+
+# RINDEX Indice por resumen
+rails g model Rindex ocurrencia:integer documento:references termino:references
+
+# CLINDEX Indice por palabras clave
+rails g model Clindex ocurrencia:integer documento:references termino:references
+
+# TEXTO texto plano del documento
+rails g model Contenido texto:text documento:references
+
+# PUBLICACION es el archivo del documento
+rails g paperclip documento publicacion
+
+## MIGRATIONS ##
+
+## TO DO Modelos de Busqueda
+
+# CONSULTAS SQL ADICIONALES
+ALTER TABLE estudiante CHANGE eficiencia         eficiencia         DECIMAL(6,4);
+ALTER TABLE estudiante CHANGE promedio_general   promedio_general   DECIMAL(6,4);
+ALTER TABLE estudiante CHANGE promedio_ponderado promedio_ponderado DECIMAL(6,4);
+ALTER TABLE contenido  CHANGE texto              texto              LONGTEXT;
+ALTER TABLE documento  CHANGE resumen            resumen            MEDIUMTEXT;
+ALTER TABLE persona    CHANGE cedula             cedula             CHAR(10);
+
+
+ 

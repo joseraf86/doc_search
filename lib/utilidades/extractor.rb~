@@ -1,0 +1,12 @@
+module Utilidades
+  def extraer( archivo )
+    text = ""
+    reader = PDF::Reader.new( archivo )
+    reader.pages.each do |page|
+      if page.text != nil
+        text = text + page.text
+      end
+    end
+    return text
+  end
+end

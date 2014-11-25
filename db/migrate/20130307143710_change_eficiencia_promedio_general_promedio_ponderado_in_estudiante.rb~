@@ -1,0 +1,9 @@
+class ChangeEficienciaPromedioGeneralPromedioPonderadoInEstudiante < ActiveRecord::Migration
+  def up
+    change_column :estudiante, :eficiencia, :promedio_general, :promedio_ponderado, :decimal
+  end
+
+  def down
+    change_column :estudiante, :eficiencia, :promedio_general, :promedio_ponderado, :float
+  end
+end

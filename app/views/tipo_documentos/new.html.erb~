@@ -1,0 +1,5 @@
+<% titulo 'Crear Tipo de Documento' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', tipo_documentos_path %>

@@ -1,0 +1,95 @@
+<script>
+function cargar_documento( doc_id )
+{
+  $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){});
+}
+</script>
+
+<%= titulo 'Directorio de documentos ' %>
+<ul class="nav nav-tabs">
+  
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Escuelas <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+	<%= link_to 'Biologia',    '/directorio/escuelas/biologia' 	  %>
+	<%= link_to 'Computacion', '/directorio/escuelas/computacion' %>
+	<%= link_to 'Fisica',      '/directorio/escuelas/fisica' 	  %>
+	<%= link_to 'Geoquimica',  '/directorio/escuelas/geoquimica'  %>
+	<%= link_to 'Matematica',  '/directorio/escuelas/matematica'  %>
+	<%= link_to 'Quimica',     '/directorio/escuelas/quimica' 	  %>
+    </ul>
+  </li>
+
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+      Tipos
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+	<%= link_to 'Documentos por Tipo', 'directorio/tipos' %> 
+    </ul>
+  </li>
+
+  <li class="dropdown">
+    <%= link_to 'Años', 'directorio/fechas' %> 
+  </li>
+</ul>
+<h3><%= @escuela %></h3>
+<table class="table table-striped tabla">
+  <thead class="head-blue">
+    <tr>
+      <th>Titulo</th>
+      <th style="width:15%">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @documentos_escuelas.each do |documento| %>
+  <tr>
+    <td>
+	<% if documento.visibilidad.id == 1 %>
+	  <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)">
+            <%= documento.titulo %>
+          </a>
+        <% else %>
+	  <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)">
+            <%= documento.titulo %>
+          </a>
+        <% end %>
+    </td>
+    <td>
+      <%= link_to documento, { :class => 'btn btn-info', :style => "color:white", :'data-toggle' => "modal", 
+	:'data-target' => "#doc-info", :onclick => "cargar_documento( #{documento.id} )"} do %>
+         <i class="icon-white icon-search"></i> Ver 
+      <% end %>
+      <% if documento.visibilidad.descripcion == 'PUBLICO' %>
+        <%= link_to "/documentos/descargar/#{ documento.id}", { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-download"></i> Descargar 
+        <% end %>
+      <% end %>
+    </td>
+  </tr>
+  <% end %>
+  </tbody>
+</table> 
+
+<%= link_to '/directorio', { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-arrow-left"></i> Volver 
+<% end %>
+
+<!-- Ventana Modal -->
+<div id="doc-info" class="modal hide fade" title="Detalles">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Detalles</h3>
+  </div>
+  <div id="doc-info-body" class="modal-body">
+     <!-- contenido (se carga por ajax) -->
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+  </div>
+</div>
+

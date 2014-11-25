@@ -1,0 +1,57 @@
+<% content_for :admin_sesion do %>
+    <% if usuario_signed_in? %>
+      <span style="display:inline; float:right; margin-right:20px;">
+       <%= current_usuario.nombre %> 
+       <%= link_to "cerrar sesion", destroy_usuario_session_path, :method => :delete, :style => 'color:white; text-decoration:underline;' %>
+      </span>
+    <% end %>
+<% end %>
+
+<% content_for :admin_titulo do %>
+  <h1 style="padding: 10px; border-radius: 15px 5px; line-height:30px; background: rgb(73, 175, 205); background-image: -moz-linear-gradient(center top , rgb(91, 192, 222), rgb(47, 150, 180)); color: #fff;
+        text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 2px 0px #666, 0px 6px 5px #001135; width:48%"> Busconest Admin Panel </h1>
+<br />
+<ul class="nav nav-tabs">
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+      Documentos
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+       <%= link_to 'Documentos',  documentos_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Areas',       areas_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Tipo de Documento', tipo_documentos_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Reconocimentos', reconocimientos_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Idiomas',     idiomas_path, {:style => "margin-left:10px"} %><br/>
+    </ul>
+  </li>
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+      Personas
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu" >
+      <!-- links -->
+       <%= link_to 'Personas',    personas_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Estudiantes', estudiantes_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Menciones',   mencions_path, {:style => "margin-left:10px"} %><br/>
+       <%= link_to 'Premios',     premios_path, {:style => "margin-left:10px"} %><br/> 
+    </ul>
+  </li>
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+      Dashboard
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+       <%= link_to 'Dashboard', dashboard_documentos_path, {:style => "margin-left:10px"} %> 
+    </ul>
+  </li>
+</ul>
+
+<% end %>
+
+<%= render :template => 'layouts/application' %>
+

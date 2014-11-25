@@ -1,0 +1,819 @@
+# Encoding: UTF-8
+class DocumentosController < AdminController
+  include Utilidades
+
+  # Estado del documento
+  NUEVO = 1
+  INDEXADO = 2
+
+  # Visibilidad
+  PUBLICO = 1
+  PRIVADO = 2
+
+  # Escuelas
+  BIOLOGIA = 1
+  COMPUTACION = 2
+  FISICA = 3
+  GEOQUIMICA = 4
+  MATEMATICA = 5
+  QUIMICA = 6
+
+  # Tipo de documento
+  TEG = 1
+  SEM = 2
+  
+  # GET /documentos
+  # GET /documentos.json
+  def index
+    # @documentos = Documento.all
+    @documentos = Documento.order("fecha_publicacion DESC").paginate(:page => params[:page])
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @documentos }
+    end
+  end
+
+  # GET /documentos/1
+  # GET /documentos/1.json
+  def show
+    @documento = Documento.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @documento }
+    end
+  end
+
+  # GET /documentos/new
+  # GET /documentos/new.json
+  def new
+    @documento = Documento.new
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @documento }
+    end
+  end
+
+  # GET /documentos/1/edit
+  def edit
+    @documento = Documento.find(params[:id])
+
+    # Variables para preservar los valores de los text-field autocompletados
+    @autor1 = @documento.personas_autor.first
+    @autor2 = @documento.personas_autor.second
+    @autor3 = @documento.personas_autor.third
+
+    @tutor1 = @documento.personas_tutor.first
+    @tutor2 = @documento.personas_tutor.second
+
+    @jurado1 = @documento.personas_jurado.first
+    @jurado2 = @documento.personas_jurado.second
+  end
+
+  # POST /documentos
+  # POST /documentos.json
+  def create
+
+#@parametro = params[:image_file].original_filename
+
+    @documento = Documento.new(params[:documento])
+    @documento.estado = 'INCOMPLETO'
+
+    # Si el documento no es evaluado, eliminar la nota
+    unless params[:documento][:tipo_documento_id].to_i.between?(1,2)
+       @documento.calificacion = 0     
+    end
+
+    # Crear autores, tutores y jurados
+    crear_autores(@documento,params)
+    crear_tutores(@documento,params)
+    crear_jurados(@documento,params)
+
+    # Inicializar el estado del documento a NUEVO
+    @documento.estado_documento_id = NUEVO
+
+    # Almacenar titulo_texto_plano
+    @documento.titulo_texto_plano = ActionController::Base.helpers.strip_tags(params[:documento][:titulo])
+
+    # Almacenar resumen_texto_plano
+    @documento.resumen_texto_plano = ActionController::Base.helpers.strip_tags(params[:documento][:resumen])
+
+    # Variables para preservar los valores de los text-field autocompletados
+    @autor1 = @documento.personas_autor.first
+    @autor2 = @documento.personas_autor.second
+    @tutor1 = @documento.personas_tutor.first
+    @tutor2 = @documento.personas_tutor.second
+    @jurado1 = @documento.personas_jurado.first
+    @jurado2 = @documento.personas_jurado.second
+
+    @documento.descargas = 0
+
+    respond_to do |format|
+      if @documento.save
+        #@documento.update_attributes( :paginas =>  Utilidades::contar_paginas(@documento.publicacion.path))
+        #format.html { redirect_to @documento, notice: 'Documento creado' }
+        format.html { redirect_to "/subir_archivo/#{@documento.id}" }
+        format.json { render json: @documento, status: :created, location: @documento }
+      else
+        format.html { render :action => "new", :layout => !request.xhr? }
+        #render action: "new", notice: "prueba_notice",  }
+        format.json { render json: @documento.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def subir_archivo
+    @documento = Documento.find(params[:id])
+  end
+
+  def guardar_archivo
+    doc = Documento.find(params[:id])
+    doc.update_attributes(params[:documento])
+    doc.update_attributes( :paginas =>  Utilidades::contar_paginas(doc.publicacion.path), :estado => 'COMPLETO' )
+  end
+
+  def guardar_archivo_conest
+    if params.has_key?(:id) && params[:id] != "" && !params.nil?
+      doc = Documento.find(params[:id])
+      doc.update_attributes(params[:documento])
+      doc.update_attributes( :paginas =>  Utilidades::contar_paginas(doc.publicacion.path), :estado => 'COMPLETO' )
+      respond_to do |format|
+        format.html { render :layout => false }
+        format.json { render json: {status:'ok'} }
+      end#do
+    else
+      respond_to do |format|
+        format.html { render :layout => false }
+        format.json { render json: {status:'error'} }
+      end#do
+    end#if
+  end#def
+
+  # PUT /documentos/1
+  # PUT /documentos/1.json
+  def update
+    @documento = Documento.find(params[:id])
+
+    # Si no hay ningun check box marcado en el campo "reconocimientos" del formulario _form.erb
+    # se destruyen todos los reconocimientos del documento.
+    # El browser no envia parametros si no se marca un check box
+    #
+    @documento.reconocimientos.destroy_all unless params.has_key?(:reconocimientos_ids)
+    @documento.areas.destroy_all           unless params.has_key?(:areas_ids)
+
+    # Actualizar autores, tutores y jurados
+    actualizar_autores(@documento,params)
+
+    # Si el documento es TEG o SEM
+    if params[:documento][:tipo_documento_id].to_i.between?(1,2)
+      # Eliminar el 3° autor
+      if @documento.autors.size == 3
+        @documento.autors.third.destroy unless autores.third.nil?
+      end#if
+
+      # Actualizar tutores y jurados
+      actualizar_tutores(@documento, params)
+      actualizar_jurados(@documento, params)
+    else
+      # Si el documento no es TEG o SEM eliminar todos 
+      # los tutores, jurados y la calificacion
+      #
+      @documento.tutors.destroy_all
+      @documento.jurados.destroy_all
+      params[:documento][:calificacion] = 0
+    end#if
+
+    # Eliminar Contenido#texto anterior
+    # Elimnar cindex, tindex, rindex, clindex anteriores
+    #
+    limpiar_indices(@documento)
+
+    # Actualizar el estado del documento a NUEVO
+    @documento.estado_documento_id = NUEVO
+
+    # Actualizar titulo_texto_plano
+    @documento.titulo_texto_plano = ActionController::Base.helpers.strip_tags(params[:documento][:titulo])
+
+    # Actualizar resumen_texto_plano
+    @documento.resumen_texto_plano = ActionController::Base.helpers.strip_tags(params[:documento][:resumen])
+
+    # Variables para preservar los valores de los text-field autocompletados
+    @autor1 = @documento.personas_autor.first
+    @autor2 = @documento.personas_autor.second
+    @autor3 = @documento.personas_autor.third
+    @tutor1 = @documento.personas_tutor.first
+    @tutor2 = @documento.personas_tutor.second
+    @jurado1 = @documento.personas_jurado.first
+    @jurado2 = @documento.personas_jurado.second
+
+    respond_to do |format|
+      if @documento.update_attributes(params[:documento])
+        format.html { redirect_to "/subir_archivo/#{@documento.id}" }
+        format.json { head :no_content }
+      else
+        format.html { render action: "edit" }
+        format.json { render json: @documento.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /documentos/1
+  # DELETE /documentos/1.json
+  def destroy
+    @documento = Documento.find(params[:id])
+    # Eliminar los registros asociativos de las tablas JOIN 
+    # para las asociaciones HBTM (has_and_belongs_to_many)
+    #
+    @documento.reconocimientos.destroy_all
+    @documento.areas.destroy_all
+
+    @documento.destroy
+
+    respond_to do |format|
+      format.html { redirect_to documentos_url, :notice => "#{@documento.titulo} eliminado" }
+      format.json { head :no_content }
+    end
+  end
+
+  def indexar
+    @documento = Documento.find(params[:id])
+    #si el documento tiene el estado NUEVO
+    if @documento.estado_documento_id == NUEVO && @documento.estado == 'COMPLETO'
+      #almacenar el nuevo contenido en la BB.DD.
+      @documento.build_contenido
+      @documento.contenido.texto = Utilidades::extraer_texto(@documento.publicacion.path)
+      @documento.contenido.save
+
+      Utilidades::llenar_tindex(@documento)
+      Utilidades::llenar_cindex(@documento)
+      Utilidades::llenar_rindex(@documento)
+      Utilidades::llenar_clindex(@documento)
+
+      @documento.estado_documento_id = INDEXADO
+
+      respond_to do |format|
+        if @documento.save
+          format.html { redirect_to documentos_url, notice: "El documento #{@documento.titulo} fue indexado exitosamente" }
+          format.json { head :no_content }
+        else
+          format.html { redirect_to documentos_url, alert: "Algo salio mal #{@documento.errors.messages}"}
+          format.json { render json: @documento.errors, status: :unprocessable_entity }
+        end#if
+      end#do
+    else
+      respond_to do |format|
+          format.html { redirect_to documentos_url, notice: "El documento #{@documento.titulo} ya se encuentra indexado" }
+          format.json { head :no_content }
+      end#do
+    end#if
+  end#def
+
+
+  def datos_documento
+    @documento = Documento.find(params[:id])
+    @booleano = !request.xhr? 
+
+    respond_to do |format|
+      format.html { render :layout => false } #!request.xhr? 
+      #format.json { render json: @documento }
+    end
+  end
+
+  def dashboard
+
+    # Tabla general
+    @documentos_totales = Documento.all.size
+
+    @documentos_indexados_totales = Documento.where("estado_documento_id = ?", INDEXADO).size
+    @documentos_nuevos_totales = Documento.where("estado_documento_id = ?", NUEVO).size
+
+    @documentos_publicos_totales = Documento.where("visibilidad_id = ?", PUBLICO).size
+    @documentos_privados_totales = Documento.where("visibilidad_id = ?", PRIVADO).size
+
+    # Tabla documentos por escuela
+    @documentos_escuela_hash = Hash.new 0
+    Escuela.all.each do |escuela|
+      @documentos_escuela_hash[escuela.descripcion] = escuela.documentos.size
+    end#do
+
+    max_escuela = @documentos_escuela_hash.max_by{|k,v| v}.second
+    @escuelas_max = @documentos_escuela_hash.select { |escuela,documentos| documentos == max_escuela }
+
+    # Tabla documentos por area
+    @documentos_area_hash = Hash.new 0
+    Area.all.each do |area|
+      @documentos_area_hash[area.descripcion] = area.documentos.size
+    end#do
+
+    if @documentos_area_hash.any? 
+      max_area = @documentos_area_hash.max_by{|k,v| v}.second
+      @areas_max = @documentos_area_hash.select { |area,documentos| documentos == max_area }
+    end
+
+    # Tabla documentos por tipo de documento
+    @documentos_tipo_hash = Hash.new 0
+    TipoDocumento.all.each do |tipo|
+      @documentos_tipo_hash[tipo.descripcion] = tipo.documentos.size
+    end#do
+
+    max_tipo = @documentos_tipo_hash.max_by{|k,v| v}.second
+    @tipos_max = @documentos_tipo_hash.select { |tipo,documentos| documentos == max_tipo }
+
+    personas = Persona.all
+    # Autores con mas documentos
+    max_autor = personas.map { |persona| [persona.nombre_completo, persona.documentos_autor.size] }
+    maximo_a = max_autor.max_by { |data| data.second }.second 
+    @autores_maximo = max_autor.select { |persona| persona.second == maximo_a }
+   
+    # Tutores con mas documentos
+    max_tutor = personas.map { |persona| [persona.nombre_completo, persona.documentos_tutor.size] }
+    maximo_t = max_tutor.max_by { |data| data.second }.second 
+    @tutores_maximo = max_tutor.select { |persona| persona.second == maximo_t }
+
+    # Jurados con mas documentos
+    max_jurado = personas.map { |persona| [persona.nombre_completo, persona.documentos_jurado.size] }
+    maximo_j = max_jurado.max_by { |data| data.second }.second 
+    @jurados_maximo = max_jurado.select { |persona| persona.second == maximo_j }
+
+    # Documentos con y sin calificacion
+    @documentos_calificados_totales = Documento.where("calificacion > 0").size
+    @documentos_no_calificados_totales = Documento.where("visibilidad_id = 0").size
+
+    # Promedios de los TEG (Trabajo Especial de Grado)
+    # Promedio general
+    #
+    teg_ciencias = Documento.where("calificacion > 0 AND tipo_documento_id = ?", TEG ).select("calificacion")
+    if teg_ciencias.any?
+      @promedio_TEG_ciencias = teg_ciencias.inject(0.0) { |sum, nota| sum + nota.calificacion }/teg_ciencias.size.to_f
+    else
+      @promedio_TEG_ciencias = 0.0
+    end#end
+
+    # Promedio TEG por escuelas
+    escuelas_hash = Hash.new 0
+    Escuela.all.each {|escuela| escuelas_hash[escuela.descripcion] = escuela.id }
+
+    @promedios_TEG_escuelas_hash = Hash.new 0
+    escuelas_hash.each do |escuela, n|
+      teg_ciencias = Documento.where("calificacion > 0 AND tipo_documento_id = ? AND escuela_id = ?", TEG, n ).select("calificacion")
+      if teg_ciencias.any?
+        @promedios_TEG_escuelas_hash[escuela] = teg_ciencias.inject(0.0) { |sum, nota| sum + nota.calificacion }/teg_ciencias.size.to_f
+      else
+        @promedios_TEG_escuelas_hash[escuela] = 0.0
+      end#end
+    end#do
+
+    # Promedios de los SEM (seminarios)
+    # Promedio general
+    #
+    sem_ciencias  = Documento.where("calificacion > 0 AND tipo_documento_id = ?", SEM ).select("calificacion")
+    if sem_ciencias.any?
+      @promedio_SEM_ciencias = sem_ciencias.inject(0.0) { |sum, nota| sum + nota.calificacion }/sem_ciencias.size.to_f
+    else
+      @promedio_SEM_ciencias = 0.0
+    end#end
+
+    # Promedios SEM por escuela
+    @promedios_SEM_escuelas_hash = Hash.new 0
+    escuelas_hash.each do |escuela, n|
+      sem_ciencias = Documento.where("calificacion > 0 AND tipo_documento_id = ? AND escuela_id = ?", SEM, n ).select("calificacion")
+      if sem_ciencias.any?
+        @promedios_SEM_escuelas_hash[escuela] = sem_ciencias.inject(0.0) { |sum, nota| sum + nota.calificacion }/sem_ciencias.size.to_f
+      else
+        @promedios_SEM_escuelas_hash[escuela] = 0.0
+      end#end
+    end#do
+
+    # Agrupar los TEG segun rango de calificacion [1-9] [10-14] [15-16] [17-18] [19-20]
+    @teg_rangos = Hash.new 0
+    [[0,9],[10,14],[15,16],[17,18],[19,20]].each do |rango|
+      docs = Documento.where(:calificacion => (rango.first..rango.second), :tipo_documento_id => TEG )
+      if docs.any?
+        @teg_rangos[rango] = docs.size
+      else
+        @teg_rangos[rango] = 0
+      end#if
+    end#do
+
+    # Agrupar los SEM segun rango de calificacion [1-9] [10-14] [15-16] [17-18] [19-20]
+    @sem_rangos = Hash.new 0
+    [[0,9],[10,14],[15,16],[17,18],[19,20]].each do |rango|
+      docs = Documento.where(:calificacion => (rango.first..rango.second), :tipo_documento_id => SEM )
+      if docs.any?
+        @sem_rangos[rango] = docs.size
+      else
+        @sem_rangos[rango] = 0
+      end#if
+    end#do
+   
+    #respond_to do |format|
+    #  format.html { render action: "mostrar_dashboard" }
+    #  format.json { head :no_content }
+    #end#do
+  end#def
+
+  def descargar
+
+    @documento = Documento.find(params[:id])
+
+    if @documento.visibilidad.descripcion == "PUBLICO" || usuario_signed_in?
+      unless @documento.descargas.nil?
+        @documento.update_attributes(:descargas => @documento.descargas += 1)
+      else
+        @documento.update_attributes(:descargas => 1)
+      end#unless
+
+      send_file("#{Rails.root}/documentos/#{@documento.escuela.descripcion}/#{@documento.fecha_publicacion.year}/documento_#{@documento.id}.pdf",
+                :filename    => "documento_#{@documento.id}",
+                :type        => 'application/pdf') #for example if pdf
+
+      #respond_to do |format|
+      #  format.html { redirect_to @documento.publicacion.url }
+      #end#do
+    else
+      respond_to do |format|
+        format.html { redirect_to '/busqueda_simple' }
+      end#do
+    end#if
+  end#def
+
+  def crear_teg_desde_conest
+
+    # Verificar la integridad de los datos
+    # DATOS COMUNES 
+    datos_comunes=params[:escuela]+params[:nota]+params[:periodo_academico_egreso]+params[:ano_lectivo_egreso]+params[:fecha_presentacion]
+
+    # DATOS ESTUDIANTE
+    estudiante=params[:cedula]+params[:nombres]+params[:apellidos]+params[:correo]+params[:promedio_general]+params[:promedio_ponderado]+params[:eficiencia]+params[:mencion_id]+params[:premio]+params[:premiodos]
+
+    #DATOS TUTOR1
+    tutor1=params[:tutor][:id]+params[:tutor][:nombre_completo]+params[:tutor][:correo]
+
+    # DATOS TUTOR2
+    tutor2=params[:tutor2][:id]+params[:tutor2][:nombre_completo]+params[:tutor2][:correo] 
+
+    # DATOS JURADO1
+    jurado1=params[:jurado][:id]+params[:jurado][:nombre_completo]+params[:jurado][:correo]
+
+    # DATOS JURADO2
+    jurado2=params[:jurado2][:id]+params[:jurado2][:nombre_completo]+params[:jurado2][:correo]
+
+    salt="aqui_debe_haber_un_string_compartido_aleatorio"
+    hash = Digest::MD5.hexdigest(estudiante+datos_comunes+tutor1+jurado1+jurado2+salt)
+
+    # verificar si es conest quien manda la solicitud
+    if hash == params[:hash]
+
+      # El premio es asociado al estudiante y el reconocimiento al documento
+      
+      premio         = "SUMA CUM LAUDE"                if params[:premio] == "PREMIO SUMA CUM LAUDE"
+      premio         = "MAGNA CUM LAUDE"               if params[:premio] == "PREMIO MAGNA CUM LAUDE"
+      premio         = "PREMIO ESPECIAL DE GRADUACION" if params[:premio] == "PREMIO ESPECIAL DE GRADUACION"
+      premio         = "PREMIO ALTO RENDIMIENTO ACADEMICO"    if params[:premio] == "PREMIO ALTO RENDIMIENTO ACADEMICO"
+
+      premio         = "SUMA CUM LAUDE"                if params[:premio2] == "PREMIO SUMA CUM LAUDE"
+      premio         = "MAGNA CUM LAUDE"               if params[:premio2] == "PREMIO MAGNA CUM LAUDE"
+      premio         = "PREMIO ESPECIAL DE GRADUACION" if params[:premio2] == "PREMIO ESPECIAL DE GRADUACION"
+      premio         = "PREMIO ALTO RENDIMIENTO ACADEMICO"    if params[:premio2] == "PREMIO ALTO RENDIMIENTO ACADEMICO"
+
+      # crear autor si no existe
+      Persona.where(:cedula => params[:cedula]).first_or_create do |persona|
+        persona.nombres  = params[:nombres]
+        persona.apellidos = params[:apellidos]
+        persona.nombre_completo = params[:nombres]+ " " + params[:apellidos]
+        persona.email = params[:correo]
+      end#first_or_create (persona)
+      persona_id = (Persona.find_by_cedula(params[:cedula])).id
+      escuela_id = (Escuela.find_by_descripcion(params[:escuela])).id
+      e = Estudiante.where(:persona_id => persona_id).first_or_create do |estudiante|
+        estudiante.persona_id         = persona_id
+        estudiante.promedio_general   = params[:promedio_general]
+        estudiante.promedio_ponderado = params[:promedio_ponderado]
+        estudiante.eficiencia         = params[:eficiencia]
+        estudiante.escuela_id         = escuela_id 
+        estudiante.grado_id           = 1 # PREGRADO
+        # Crear la mencion del estudiante
+        #
+        # Las descripciones de las menciones en la BB.DD. de Conest a veces están sin acentos
+        # y algunas letras acentuadas están en minúsculas.
+        # El CASE permite mapear los códigos en Conest con la descripción de la mencion en la BB.DD. de Busconest
+        #
+        case params[:mencion_id]
+          when 'ASTROF'
+            mencion = 'ASTROFISICA'
+          when 'ATI'
+            mencion = 'APLICACIONES EN INTERNET'
+          when 'BASICA'
+            mencion = 'BASICA' #Quimica
+          when 'BD'
+            mencion = 'BASE DE DATOS'
+          when 'BIOCEL'
+            mencion = 'BIOLOGIA CELULAR'
+          when 'BOTAN'
+            mencion = 'BOTANICA'
+          when 'CALCIE'
+            mencion = 'CALCULO CIENTIFICO'
+          when 'CIEMAT'
+            mencion = 'CIENCIA DE LOS MATERIALES'
+          when 'COMGRA'
+            mencion = 'COMPUTACION GRAFICA'
+          when 'ECOL'
+            mencion = 'ECOLOGIA'
+          when 'FISCOM'
+            mencion = 'FISICA COMPUTACIONAL'
+          when 'FISEXP'
+            mencion = 'FISICA EXPERIMENTAL'
+          when 'FISICA'
+            mencion = 'FISICA'
+          when 'FISMED'
+            mencion = 'FISICA MEDICA'
+          when 'FISTEO'
+            mencion = 'FISICA TEORICA'
+          when 'GEOFIS'
+            mencion = 'GEOFISICA'
+          when 'GEOQUI'
+            mencion = 'GEOQUIMICA'
+          when 'INGSOF'
+            mencion = 'INGENIERIA DE SOFTWARE'
+          when 'INSTR'
+            mencion = 'INSTRUMENTACION'
+          when 'INTART'
+            mencion = 'INTELIGENCIA ARTIFICIAL'
+          when 'MODMAT'
+            mencion = 'MODELOS MATEMATICOS'
+          when 'OCEAN'
+            mencion = 'OCEANOGRAFIA'
+          when 'REDES'
+            mencion = 'TECNOLOGIAS EN COMUNICACIONES Y REDES DE COMPUTADORAS'
+          when 'RESMAG'
+            mencion = 'ESPECTROSCOPIA DE RESONANCIA MAGNETICA NUCLEAR'
+          when 'SDISPA'
+            mencion = 'SISTEMAS DISTRIBUIDOS Y PARALELOS'
+          when 'SINMEB'
+            mencion = 'SIN OPCION' #Biologia
+          when 'SINMEN'
+            mencion = 'SIN OPCION' #Computacion
+          when 'SISINF'
+            mencion = 'SISTEMAS DE INFORMACION'
+          when 'TECALI'
+            mencion = 'TECNOLOGIA DE ALIMENTOS'
+          when 'TECEDU'
+            mencion = 'TECNOLOGIAS EDUCATIVAS'
+          when 'TECNOL'
+            mencion = 'TECNOLOGIA'
+          when 'ZOOL'
+            mencion = 'ZOOLOGIA'
+        end#case
+        # Recuperar la mencion
+        estudiante.mencion = Mencion.find_by_descripcion_and_escuela_id(mencion, escuela_id) 
+      end#first_or_create (estudiante)
+      e.premio = Premio.find_by_descripcion(premio)
+      # Si el TEG fue presentado en pareja
+      if params[:teg_en_pareja] == "1" && params.has_key?(:teg_en_pareja)
+        # crear autor pareja si no existe
+        Persona.where(:cedula => params[:cedula_pareja]).first_or_create do |persona|
+          persona.nombres  = params[:nombres_pareja]
+          persona.apellidos = params[:apellidos_pareja]
+          persona.nombre_completo = params[:nombres_pareja]+ " " + params[:apellidos_pareja]
+          persona.email = params[:correo_pareja]
+        end#first_or_create (persona)
+        persona_id = (Persona.find_by_cedula(params[:cedula_pareja])).id
+        escuela_id = (Escuela.find_by_descripcion(params[:escuela])).id
+        e = Estudiante.where(:persona_id => persona_id).first_or_create do |estudiante|
+          estudiante.persona_id         = persona_id
+          estudiante.promedio_general   = params[:promedio_general_pareja]
+          estudiante.promedio_ponderado = params[:promedio_ponderado_pareja]
+          estudiante.eficiencia         = params[:eficiencia_pareja]
+          estudiante.escuela_id         = escuela_id 
+          estudiante.grado_id           = 1 # PREGRADO
+          # Crear la mencion del estudiante
+          #
+          # Las descripciones de las menciones en la BB.DD. de Conest a veces están sin acentos
+          # y algunas letras acentuadas están en minúsculas.
+          # El CASE permite mapear los códigos en Conest con la descripción de la mencion en la BB.DD. de Busconest
+          #
+          case params[:mencion_id_pareja]
+            when 'ASTROF'
+              mencion = 'ASTROFISICA'
+            when 'ATI'
+              mencion = 'APLICACIONES EN INTERNET'
+            when 'BASICA'
+              mencion = 'BASICA' #Quimica
+            when 'BD'
+              mencion = 'BASE DE DATOS'
+            when 'BIOCEL'
+              mencion = 'BIOLOGIA CELULAR'
+            when 'BOTAN'
+              mencion = 'BOTANICA'
+            when 'CALCIE'
+              mencion = 'CALCULO CIENTIFICO '
+            when 'CIEMAT'
+              mencion = 'CIENCIA DE LOS MATERIALES'
+            when 'COMGRA'
+              mencion = 'COMPUTACION GRAFICA'
+            when 'ECOL'
+              mencion = 'ECOLOGIA'
+            when 'FISCOM'
+              mencion = 'FISICA COMPUTACIONAL'
+            when 'FISEXP'
+              mencion = 'FISICA EXPERIMENTAL'
+            when 'FISICA'
+              mencion = 'FISICA'
+            when 'FISMED'
+              mencion = 'FISICA MEDICA'
+            when 'FISTEO'
+              mencion = 'FISICA TEORICA'
+            when 'GEOFIS'
+              mencion = 'GEOFISICA'
+            when 'GEOQUI'
+              mencion = 'GEOQUIMICA'
+            when 'INGSOF'
+              mencion = 'INGENIERIA DE SOFTWARE'
+            when 'INSTR'
+              mencion = 'INSTRUMENTACION'
+            when 'INTART'
+              mencion = 'INTELIGENCIA ARTIFICIAL'
+            when 'MODMAT'
+              mencion = 'MODELOS MATEMATICOS'
+            when 'OCEAN'
+              mencion = 'OCEANOGRAFIA'
+            when 'REDES'
+              mencion = 'TECNOLOGIAS EN COMUNICACIONES Y REDES DE COMPUTADORAS'
+            when 'RESMAG'
+              mencion = 'ESPECTROSCOPIA DE RESONANCIA MAGNETICA NUCLEAR'
+            when 'SDISPA'
+              mencion = 'SISTEMAS DISTRIBUIDOS Y PARALELOS'
+            when 'SINMEB'
+              mencion = 'SIN OPCION' #Biologia
+            when 'SINMEN'
+              mencion = 'SIN OPCION' #Computacion
+            when 'SISINF'
+              mencion = 'SISTEMAS DE INFORMACION'
+            when 'TECALI'
+              mencion = 'TECNOLOGIA DE ALIMENTOS'
+            when 'TECEDU'
+              mencion = 'TECNOLOGIAS EDUCATIVAS'
+            when 'TECNOL'
+              mencion = 'TECNOLOGIA'
+            when 'ZOOL'
+              mencion = 'ZOOLOGIA'
+          end#case
+          # Recuperar la mencion
+          estudiante.mencion = Mencion.find_by_descripcion_and_escuela_id(mencion, escuela_id)  
+        end#first_or_create (estudiante)
+        e.premio = Premio.find_by_descripcion(premio)
+      elsif params[:teg_en_pareja] == "1" 
+        #@error = "La pareja no ha sido seleccionada"
+        redirect_to "http://127.0.0.1:3000/subir_teg/?error=001"
+        return
+      end#if  
+
+      # Crear tutores si no existen
+      Persona.where(:cedula => params[:tutor][:id]).first_or_create do |persona|
+        persona.nombres  = params[:tutor][:nombre_completo]
+        persona.apellidos = params[:tutor][:nombre_completo]
+        persona.nombre_completo = params[:tutor][:nombre_completo]
+        persona.email = params[:tutor][:correo]
+      end
+
+      # El segundo tutor es opcional
+      Persona.where(:cedula => params[:tutor2][:id]).first_or_create do |persona|
+        persona.nombres  = params[:tutor2][:nombre_completo]
+        persona.apellidos = params[:tutor2][:nombre_completo]
+        persona.nombre_completo = params[:tutor2][:nombre_completo]
+        persona.email = params[:tutor2][:correo]
+      end
+
+      # crear jurados si no existen
+      Persona.where(:cedula => params[:jurado][:id]).first_or_create do |persona|
+        persona.nombres  = params[:jurado][:nombre_completo]
+        persona.apellidos = params[:jurado][:nombre_completo]
+        persona.nombre_completo = params[:jurado][:nombre_completo]
+        persona.email = params[:jurado][:correo]
+      end
+
+      Persona.where(:cedula => params[:jurado2][:id]).first_or_create do |persona|
+        persona.nombres  = params[:jurado2][:nombre_completo]
+        persona.apellidos = params[:jurado2][:nombre_completo]
+        persona.nombre_completo = params[:jurado2][:nombre_completo]
+        persona.email = params[:jurado2][:correo]
+      end
+
+      # crear documento  
+      @doc = Documento.new( :titulo               => params[:titulo],
+                            :titulo_texto_plano   => ActionController::Base.helpers.strip_tags(params[:titulo]),
+                            :resumen              => params[:resumen],
+                            :resumen_texto_plano  => ActionController::Base.helpers.strip_tags(params[:resumen]),
+                            :palabras_clave       => params[:palabras_clave],
+                            :fecha_publicacion    => params[:fecha_presentacion],
+                            :escuela_id           => escuela_id,
+                            :tipo_documento_id    => TEG,
+                            :estado_documento_id  => NUEVO,
+                            :idioma_id            => 1, # ESPAÑOL
+                            :visibilidad_id       => params[:visibilidad_id],
+                            :calificacion         => params[:nota],
+                            :descargas            => 0,
+                            :estado               => 'INCOMPLETO'
+                            )
+
+      # Asociar autor al documento
+      @doc.personas_autor.push(Persona.find_by_cedula(params[:cedula]))
+
+      persona = Persona.find_by_cedula(params[:cedula_pareja])
+      #Si la persona existe y el TEG fue en pareja, se asocia la pareja
+      if !persona.nil? && params[:teg_en_pareja] == "1"
+        @doc.personas_autor.push(Persona.find_by_cedula(params[:cedula_pareja]))   
+      end#if
+
+      # Asociar el primer tutor al documento
+      @doc.personas_tutor.push(Persona.find_by_cedula(params[:tutor][:id]))
+
+      # El segundo tutor es opcional
+      persona = Persona.find_by_cedula(params[:tutor2][:id])
+      @doc.personas_tutor.push(persona) unless persona.nil?
+
+      # Los dos jurados son obligatorios
+      @doc.personas_jurado.push(Persona.find_by_cedula(params[:jurado][:id]))
+      @doc.personas_jurado.push(Persona.find_by_cedula(params[:jurado2][:id]))  
+
+      File.open('text2.txt', 'w') do |f|
+        f.puts Persona.find_by_cedula(params[:tutor][:id]).cedula
+        f.puts Persona.find_by_cedula(params[:tutor][:id]).nombre_completo
+        f.puts Persona.find_by_cedula(params[:tutor][:id]).email
+        f.puts Persona.find_by_cedula(params[:jurado][:id]).cedula
+        f.puts Persona.find_by_cedula(params[:jurado][:id]).nombre_completo
+        f.puts Persona.find_by_cedula(params[:jurado][:id]).email
+        f.puts Persona.find_by_cedula(params[:jurado2][:id]).cedula
+        f.puts Persona.find_by_cedula(params[:jurado2][:id]).nombre_completo
+        f.puts Persona.find_by_cedula(params[:jurado2][:id]).email
+        f.puts params[:tutor2]
+      end#do
+
+      # Guardar el documento TEG en la BB.DD.   
+      @doc.save
+
+      unless @doc.id.nil?
+        # Asociar el reconocimiento al documento
+        reconocimiento = "MENCION HONORIFICA" if params[:premio] == "MENCION HONOROFICA"
+        reconocimiento = "MENCION HONORIFICA" if params[:premio2] == "MENCION HONOROFICA"
+        f = Reconocimiento.find_by_descripcion(reconocimiento)
+        @doc.reconocimientos.push(f) unless f.nil?
+        titulo = URI::encode(params[:titulo])
+        titulo = titulo.gsub(/[;&\\]/,';' => '%3B', '&' => '%26', '\\' => '%5C')
+        #resumen = URI::encode(params[:resumen])
+        #resumen = resumen.gsub(/[;&\\]/,';' => '%3B', '&' => '%26', '\\' => '%5C')
+        #@params = titulo
+        #return
+        redirect_to "http://127.0.0.1:3000/guardar_pdf/#{@doc.id}?ci=#{params[:cedula]}&ci_p=#{params[:cedula_pareja]}&titulo="+titulo
+        return 
+      else
+        File.open('text.txt', 'w') do |f|
+          #f.puts @doc.errors.base
+          f.puts @doc.errors.messages
+          f.puts @doc.titulo
+          f.puts @doc.titulo_texto_plano
+          f.puts @doc.tipo_documento_id
+        end#do
+        # Documento con datos invalidos 
+        # @error = "Documento con datos invalidos" 
+        redirect_to "http://127.0.0.1:3000/subir_teg/?error=002"
+        return
+      end#if
+
+    else
+      # Password invalido
+      # @error = "Password invalido" - error con la clave de sesion que identifica a Conest con Busconest
+      redirect_to "http://127.0.0.1:3000/subir_teg/?error=003"
+      return
+    end#if
+  end#def
+
+  # Cross-Site Resource Sharing (CORS)
+  before_filter :cors_preflight_check
+  after_filter :cors_set_access_control_headers
+
+  # For all responses in this controller, return the CORS access control headers.
+
+  def cors_set_access_control_headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+    headers['Access-Control-Max-Age'] = "1728000"
+  end
+
+  # If this is a preflight OPTIONS request, then short-circuit the
+  # request, return only the necessary headers and return an empty
+  # text/plain.
+
+  def cors_preflight_check
+    if request.method == "OPTIONS"
+      headers['Access-Control-Allow-Origin'] = '*'
+      headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+      #headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-Prototype-Version'
+      headers['Access-Control-Max-Age'] = '1728000'
+      render :text => '', :content_type => 'text/plain'
+    end
+  end
+
+end#class

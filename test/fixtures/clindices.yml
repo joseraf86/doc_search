@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  ocurrencia: 1
+  documento: 
+  termino: 
+
+two:
+  ocurrencia: 1
+  documento: 
+  termino: 

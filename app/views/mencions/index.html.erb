@@ -1,0 +1,41 @@
+<% titulo 'Menciones' %>
+
+<%= link_to  new_mencion_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Mencion 
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Descripcion</th>
+    <th>Escuela</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @mencions.each do |mencion| %>
+  <tr>
+    <td><p class="desc"><%= mencion.descripcion %></p></td>
+    <td><%= mencion.escuela.descripcion %></td>
+    <td><!-- <%= link_to mencion, { :class => 'btn btn-info', :style => "color:white"} do %> 
+          <i class="icon-white icon-search"></i> Ver 
+        <% end %> -->
+        <%= link_to edit_mencion_path(mencion), { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to mencion, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{mencion.descripcion}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+
+  </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @mencions } %>
+
+<%= render 'shared/modal' %>
+

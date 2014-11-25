@@ -1,0 +1,6 @@
+<%= titulo 'Busqueda Simple '%><br /><br />
+
+<form action="buscar_documentos" method="post">
+  <input type="text" name="terminos"><br>
+  <input type="submit" value="Buscar">
+</form> 

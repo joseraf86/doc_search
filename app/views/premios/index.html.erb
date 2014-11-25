@@ -1,0 +1,38 @@
+<% titulo 'Premios' %>
+
+<%= link_to  new_premio_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Premio
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Descripcion</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @premios.each do |premio| %>
+  <tr>
+    <td><p class="desc"><%= premio.descripcion %></p></td>
+    <td><!--- <%= link_to premio, { :class => 'btn btn-info', :style => "color:white"} do %> 
+          <i class="icon-white icon-search"></i> Ver 
+        <% end %> -->
+        <%= link_to edit_premio_path(premio), { :class => 'btn btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to premio, { :class => 'btn btn-danger', :style => "color:white", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{premio.descripcion}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+  </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @premios } %>
+
+<%= render 'shared/modal' %>
+

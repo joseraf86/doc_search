@@ -1,0 +1,63 @@
+
+<h2><%= raw @documento.titulo %></h2>
+
+ <%= hidden_field_tag :id, @documento.id %>
+
+<div id="div-formulario" class="upload_form_cont">
+
+<%= form_for(@documento, :html => {:class => "form_horizontal", :onsubmit => "return startUploading( #{@documento.id} );",  :multipart => true }, :url => { :action => "guardar_archivo" }) do |f| %>
+
+
+  <% if @documento.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@documento.errors.count, "error") %> prohibited this documento from being saved:</h2>
+
+      <ul>
+      <% @documento.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field" style="height:240px">
+    <%= f.label :publicacion, :class => "control-label" %><br />
+    <%= f.file_field :publicacion, :onchange => "fileSelected();" %>
+
+    <!-- FILE UPLOAD  enctype="multipart/form-data"   -->
+            <div id="fileinfo">
+                <div id="filename"></div>
+                <div id="filesize"></div>
+                <div id="filetype"></div>
+                <div id="filedim"></div>
+            </div>
+            <div id="error">Formato de archivo incorrecto - formato permitido PDF</div>
+            <div id="error2">Un error ha ocurrido al cargar el archivo</div>
+            <div id="abort">La carga ha sido cancelada por el usuario o el navegador ha cancelado la conexión</div>
+            <div id="warnsize">Tu archivo es muy grande. Limite máximo permitido: 100 MB</div>
+
+            <div id="progress_info">
+                <div id="progress"></div>
+                <div id="progress_percent">&nbsp;</div>
+                <div class="clear_both"></div>
+                <div>
+                    <div id="speed">&nbsp;</div>
+                    <div id="remaining">&nbsp;</div>
+                    <div id="b_transfered">&nbsp;</div>
+                    <div class="clear_both"></div>
+                </div>
+                <div id="upload_response"></div>
+            </div>
+
+        <img id="preview" />
+    
+
+    <!-- END FILE UPLOAD -->
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+
+<% end %>
+</div>

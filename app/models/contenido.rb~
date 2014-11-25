@@ -1,0 +1,5 @@
+class Contenido < ActiveRecord::Base
+  belongs_to :documento
+  has_one :contenido
+  attr_accessible :texto
+end

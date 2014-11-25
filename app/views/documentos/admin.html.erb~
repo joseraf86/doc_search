@@ -1,0 +1,10 @@
+<% titulo "Admin" %>
+<%= link_to 'documentos',  documentos_path %><br />
+<%= link_to 'areas',       areas_path %><br />
+<%= link_to 'estudiantes', estudiantes_path %><br />
+<%= link_to 'idiomas',     idiomas_path %><br />
+<%= link_to 'mencions',    mencions_path %><br />
+<%= link_to 'personas',    personas_path %><br />
+<%= link_to 'premios',     premios_path %><br />
+<%= link_to 'tipo',        tipo_documentos_path %><br />
+

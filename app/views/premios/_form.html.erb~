@@ -1,0 +1,27 @@
+<%= form_for(@premio, :html => {:class => "form_horizontal"}) do |f| %>
+  <% if @premio.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@premio.errors.count, "error") %> prohibited this premio from being saved:</h2>
+
+      <ul>
+      <% @premio.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%", :maxlenght => "255"  %>
+    </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to premios_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+<% end %>

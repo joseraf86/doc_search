@@ -1,0 +1,2 @@
+<h2> Busconest Admin Panel </h2>
+<%= yield %>

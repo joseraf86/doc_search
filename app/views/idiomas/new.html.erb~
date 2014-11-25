@@ -1,0 +1,5 @@
+<% titulo 'Nuevo Idioma' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', idiomas_path %>

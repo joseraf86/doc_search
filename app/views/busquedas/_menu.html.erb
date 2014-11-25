@@ -1,0 +1,44 @@
+
+<%= titulo 'Directorio de Documentos ' %>
+
+<ul class="nav nav-tabs">
+  
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color:black"> Escuelas <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+        <% Escuela.all.each do |escuela| %>
+          <%= link_to escuela.descripcion.capitalize, "/directorio/escuelas/#{escuela.descripcion.downcase}", {:style => "margin-left:10px"} %><br/>
+        <% end %>
+    </ul>
+  </li>
+
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color:black">
+      Tipos
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu" style="width:180px;" >
+      <!-- links -->
+        <% TipoDocumento.all.each do |tipo_documento| %>
+  	  <%= link_to tipo_documento.descripcion.split(' ').map(&:capitalize).join(' '), "/directorio/tipos/#{tipo_documento.descripcion_corta.downcase}", {:style => "margin-left:10px;"} %><br/>
+        <% end %> 
+    </ul>
+  </li>
+
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color:black"> Años <b class="caret"></b></a>
+    <ul class="dropdown-menu">
+      <% (Documento.minimum("fecha_publicacion").year..Documento.maximum("fecha_publicacion").year).each do |year| %>
+        <% fecha_inicio = year.to_s+'/01/01' %>
+        <% fecha_fin = (fecha_inicio.to_date + 1.year).strftime("%Y/%m/%d") %>
+        <% docs = Documento.where("fecha_publicacion >= ? AND fecha_publicacion < ?", fecha_inicio, fecha_fin).order('fecha_publicacion DESC') %>
+         <% if docs.any? %>
+          <%= link_to year, "/directorio/fechas/#{year}", {:style => "margin-left:10px"} %><br/>
+        <% end %>
+      <% end %>
+    </ul>
+  </li>
+</ul>
+

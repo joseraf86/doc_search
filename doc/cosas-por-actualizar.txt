@@ -1,0 +1,52 @@
+1)adicion de mensaje de error devise
+2)eliminacion del jquery-ui.js y jquery-ui.css, adicion de bootstrap 2.3.1 con jquery 1.10.2 y jquery-migrate 1.
+
+3)reimplementacion de autocomplete en busqueda avanzada, documentos y estudiantes
+se reimplemento el script autocompletar
+
+tambien del lado del servidor se modifico la funcion que retorna la lista de personas para la llamada ajax
+
+
+correcion de ventanas modales
+se corrigio el error que se cargaban doble la ventana modal
+seteando el href="#" de los anchors
+
+correcion de ventana modal en busqueda avanzada
+
+cambio de botones en las busquedas publicas de gris a azul
+
+correccion del bug en la barra de navegacion del admin
+correccion del bug en la barra de navegacion de las busquedas
+correcion del titulo busqueda avanazda con bordes redondeados en el Admin Panel
+eliminar todas las llamadas a la funcion autocompletar en las vistas que requirireron autocomplete
+
+
+autocomplete de TEG deben ser estudiante nada mas.
+___
+
+vista de busqueda avanzada ahora con los label bien utilizados
+
+
+eliminar el enlace admin del navbar negro desde la interfaz publica
+
+arreglar las ventanas modales adicionales que se estan cargando doble
+
+NOTAS IMPORTANTES
+preguntas
+1) ¿las personas que hacen tesis en pareja tienen que ser de la misma escuela?
+No pareciera, el documento pertence solo a una escuela
+corolario: en el autocomplete solo se deben mostrar estudiantes de la escuela del usuario actual!
+
+2) ¿Cuando el alumno esta por subir su documento el campo es_pareja en la tabla planilla_individual ya esta seteado o lo tengo que setear?
+Pareciera que no, porque todos estan en NULL, parece un campo que no tienen uso
+
+3) Como obtengo la mencion de un alumno, hay una tabla mencion pero no se desde donde se hace referencia a esta
+
+4) En la tabla calificador externo planilla y docente planilla 
+¿cuales de los siguientes codigos pertenecen  a JURADO de TEG?: J1 J2 JU PR SU
+Asumi que J1 y J2 solamente
+
+5) En estudiante_datos_academicos hay estudiantes con 2 registros distintos,
+   incluso hay algunos donde uno de esos registros tiene valores incoherentes (Miguel Chan)
+
+

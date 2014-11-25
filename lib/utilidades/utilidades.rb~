@@ -1,0 +1,564 @@
+# Encoding: UTF-8
+module Utilidades
+
+  # Extraer todo el texto de un documento en formato PDF
+  #
+  # @param archivo string con la ruta del archivo
+  #
+  def self.extraer_texto(archivo)
+    texto = ""
+    lector = PDF::Reader.new(archivo)
+    lector.pages.each do |pagina|
+      if !pagina.text.nil?
+        texto = texto + pagina.text
+      end
+    end
+    return texto
+  end
+
+  def self.contar_paginas(archivo)
+    lector = PDF::Reader.new(archivo)
+    return lector.page_count
+  end
+
+  # Crear a partir de un string un arreglo de terminos
+  #
+  # @param texto_plano string con todo el contenido del documento en texto plano
+  # @param codigo_idioma codigo del idioma del documento
+  #
+  def self.generar_terminos(texto_plano="", codigo_idioma="es")
+    texto = texto_plano  
+    # Si el idioma es español eliminar símbolos diacriticos del texto
+    # y transformar todas las letras a mayúsculas
+    #
+    if (codigo_idioma == "es")
+
+      texto = texto.gsub("á", "a")
+      texto = texto.gsub("é", "e")
+      texto = texto.gsub("í", "i")
+      texto = texto.gsub("ó", "o")
+      texto = texto.gsub("ú", "u")
+      texto = texto.gsub("ü", "u")
+      texto = texto.gsub("Á", "A")
+      texto = texto.gsub("É", "E")
+      texto = texto.gsub("Í", "I")
+      texto = texto.gsub("Ó", "O")
+      texto = texto.gsub("Ú", "U")
+      texto = texto.gsub("Ü", "U")
+      texto = texto.upcase
+      # Dividir el texto en sus terminos constituyentes
+      terminos = texto.split(/\W+|\s+/).reject{ |e| e.empty? }
+      # Eliminar los terminos que contengan sólo numeros
+      terminos.reject! {|word| word =~ /\A[0-9]+\z/ }
+      # Eliminar los terminos de longitud 1
+      terminos.reject! {|word| word.length == 1 }
+      # Lista de terminos que generan ruido
+      pronombres_personales     = /\AME\z|\ATE\z|\ASE\z|\ANOS\z|\ALO\z|\ALOS\z|\ALA\z|\ALAS\z|\ALE\z|\ALES\z|\AYO\z|\ATU\z|\AVOS\z|\AEL\z|\AELLA\z|\AELLAS\z|\AELLO\z|\AELLOS\z|\AUSTED\z|\AUSTEDES\z|\ANOSOTROS\z|\ANOSOTRAS\z|\AVOSOTROS\z|\AVOSOTRAS\z|\AMI\z|\ATI\z|\ASI\z/
+      pronombres_reciprocos     = /\ANOS\z|\ASE\z|\ADEL\z|\ACON\z|\AEL\z|\AETC\z/
+      pronombres_demostrativos  = /\AESTE\z|\AESTOS\z|\AESTA\z|\AESTAS\z|\AESE\z|\AESOS\z|\AESA\z|\AESAS\z|\AAQUEL\z|\AAQUELLA\z|\AAQUELLOS\z|\AAQUELLAS\z/
+      pronombres_posesivos      = /\AMI\z|\AMIO\z|\AMIOS\z|\AMIA\z|\AMIAS\z|\ATUYO\z|\ATUYOS\z|\ATUYA\z|\ATUYAS\z|\ASU\z|\ASUS\z|\ASUYO\z|\ASUYOS\z|\ASUYA\z|\ASUYAS\z|\ANUESTRO\z|\ANUESTROS\z|\ANUESTRA\z|\ANUESTRAS\z|\AVUESTRO\z|\AVUESTROS\z|\AVUESTRA\z|\AVUESTRAS\z/
+      pronombres_relativos      = /\AEL\z|\AQUE\z|\ACUAL\z|\ACUALES\z|\AQUIEN\z|\AQUIENES\z|\ACUYO\z|\ACUYA\z|\ACUYOS\z|\ACUYAS\z/
+      pronombres_interrogativos = /\ADONDE\z|\ACUANDO\z/
+      pronombres_indefinidos    = /\ANINGUN\z|\ANINGUNO\z|\ANINGUNOS\z|\AALGUN\z|\ALGUNO\z|\AALGUNOS\z|\AALGUNA\z|\AALGUNAS\z|\AVARIOS\z|\AVARIAS\z|\AALGUIEN\z|\ANADIE\z|\AOTRO\z|\AOTROS\z|\AOTRA\z|\AOTRAS\z|\ACUALQUIER\z|\ACUALQUIERA\z|\ACUALESQUIERA\z/
+      articulos                 = /\AEL\z|\ALA\z|\ALO\z|\ALOS\z|\ALAS\z|\AUN\z|\AUNOS\z|\AUNA\z|\AUNAS\z/
+      adverbios_de_tiempo       = /\AAHORA\z|\AAYER\z|\AANTEAYER\z|\AHOY\z|\AMAÑANA\z|\AANTES\z|\AANOCHE\z|\AAUN\z|\ACUANDO\z|\ADESPUES\z|\AENTONCES\z|\ALUEGO\z|\AMIENTRAS\z|\ANUNCA\z|\ASIEMPRE\z|\ATARDE\z|\ATODAVIA\z|\AYA\z/
+      adverbios_de_lugar        = /\AAQUI\z|\AALLI\z|\AALLA\z|\AACA\z|\AAFUERA\z|\AABAJO\z|\ADELANTE\z|\AADELANTE\z|\AALREDEDOR\z|\AARRIBA\z|\AATRAS\z|\ACERCA\z|\ADEBAJO\z|\ADONDE\z|\AENCIMA\z|\AENFRENTE\z|\AFUERA\z|\ALEJOS\z/
+      adverbios_de_modo         = /\AASI\z|\AASIMISMO\z|\ABIEN\z|\AMAL\z|\ACASI\z|\ACOMO\z|\ADESPACIO\z|\ARAPIDO\z|\ALENTO\z|\ADEPRISA\z/
+      adverbios_de_negacion     = /\ANO\z|\ANUNCA\z|\ATAMPOCO\z|\AJAMAS\z|\AFACIL\z|\ADIFICIL\z/
+      adverbios_de_afirmacion   = /\ASI\z|\ACLARO\z|\AEXACTO\z|\ACIERTAMENTE\z|\ASEGURAMENTE\z|\AJUSTO\z|\AYA\z|\ATAMBIEN\z/
+      adverbios_de_cantidad     = /\ACASI\z|\ACUANTO\z|\ADEMASIADO\z|\AMAS\z|\AMENOS\z|\AMUCHO\z|\APOCO\z|\ATODO\z|\ASOLO\z|\AMITAD\z|\ATAN\z|\ATANTO\z|\AMUY\z/
+      adverbios_de_duda         = /\AQUIZAS\z|\AACASO\z|\ATAL\z|\AVEZ\z|\AETC\z/
+      preposiciones             = /\AA\z|\AANTE\z|\ABAJO\z|\ACON\z|\ACONTRA\z|\ADE\z|\ADESDE\z|\AEN\z|\AENTRE\z|\AHACIA\z|\AHASTA\z|\APARA\z|\APOR\z|\ASEGUN\z|\ASIN\z|\ASO\z|\ASOBRE\z|\ATRAS\z|\ADURANTE\z|\AMEDIANTE\z|\AON\z/
+      conj_disy_contr           = /\AY\z|\AO\z|\AE\z|\AU\z|\ANI\z|\APERO\z|\AMAS\z|\ACONQUE\z|\ASINO\z|\ADEL\z|\AAL\z/
+      otras_palabras            = /\AFIGURA\z|\ATABLA\z|\ACAPITULO\z|\AREFERENCIA\z|\ARESUMEN\z|\AINTRODUCCION\z|\ACONCLUSION\z|\AES\z|\ASON\z|\APUEDE\z|\APUEDEN\z|\ACADA\z|\ASER\z|\ATIENE\z|\AREALIZA\z|\ASIGUIENTE\z|\ASIGUIENTES\z|\ADICHO\z|\ADICHOS\z|\ASEA\z/
+      # Eliminar todos los terminos innecesarios
+      terminos.reject! {|word| word =~ pronombres_personales }
+      terminos.reject! {|word| word =~ pronombres_reciprocos }
+      terminos.reject! {|word| word =~ pronombres_demostrativos }
+      terminos.reject! {|word| word =~ pronombres_posesivos }
+      terminos.reject! {|word| word =~ pronombres_relativos }
+      terminos.reject! {|word| word =~ pronombres_interrogativos }
+      terminos.reject! {|word| word =~ pronombres_indefinidos }
+      terminos.reject! {|word| word =~ articulos }
+      terminos.reject! {|word| word =~ adverbios_de_tiempo }
+      terminos.reject! {|word| word =~ adverbios_de_lugar }
+      terminos.reject! {|word| word =~ adverbios_de_modo }
+      terminos.reject! {|word| word =~ adverbios_de_negacion }
+      terminos.reject! {|word| word =~ adverbios_de_afirmacion }
+      terminos.reject! {|word| word =~ adverbios_de_cantidad }
+      terminos.reject! {|word| word =~ adverbios_de_duda }
+      terminos.reject! {|word| word =~ preposiciones }
+      terminos.reject! {|word| word =~ conj_disy_contr }
+      terminos.reject! {|word| word =~ otras_palabras }
+      terminos.reject! {|word| word.length > 255 }
+    else
+      # SI EL IDIOMA NO ES ESPAÑOL     
+      # IMPLEMENTAR PROCESADO DE TEXTO EN OTROS IDIOMAS AQUI
+      # Eliminar acentos y otros simbolos diacríticos del texto primero
+      #
+      # Transformar el texto a mayusculas
+      texto = texto.upcase
+      # Dividir el texto en terminos (OJO: si se hace antes, "split" elimina las letras acentuadas) 
+      terminos = texto.split(/\W+|\s+/).reject{ |e| e.empty? }
+      # Eliminar los terminos que contengan sólo números
+      terminos.reject! {|word| word =~ /\A[0-9]+\z/ }
+      # Eliminar los terminos de longitud 1
+      terminos.reject! {|word| word.length == 1 }
+      # Eliminar los terminos innecesarios (elaborar lista de teminos-ruido)
+    end
+    return terminos   
+  end
+
+  # Crea un hash con la forma [termino, n° de ocurrencias(palabra)] 
+  # a partir de un arreglo de terminos
+  #
+  # @param arr_terminos es arreglo donde cada elemento es un termino
+  #
+  def self.agrupar_terminos(arr_terminos)
+    terminos = arr_terminos
+    # Inicializar el hash a 0 para que += funcione correctamente
+    hash = Hash.new(0)
+    # Iterar sobre el arreglo, contando las entradas duplicadas
+    terminos.each {|palabra| hash[palabra] += 1 }
+ 
+    # Ordenar los terminos por número de ocurrencias
+    # hash = hash.sort_by {|palabra, ocurrencia| ocurrencia}
+
+    # Inversion del hash, los valores mayores primero
+    # Hash[hash.to_a.reverse]
+
+    return hash
+  end
+
+  def self.salvar_termino(termino, idioma)
+    term = Termino.find_by_descripcion_and_idioma_id(termino, idioma)
+    if term.nil? 
+      term = Termino.new(:descripcion => termino, :idioma_id => idioma)
+      term.save
+    end#if
+    return term.id
+  end
+
+  # Crear un array de terminos a partir del contenido del documento
+  # y agruparlos con sus respectivas ocurrencias
+  #
+  # @param documento es el objeto documento creado en Documento#indexar
+  #
+  def self.llenar_tindex(documento)
+    terminos = agrupar_terminos(generar_terminos(documento.titulo_texto_plano, documento.idioma.codigo))
+    terminos.each {|t, o| documento.tindices << Tindex.new(:termino_id => salvar_termino(t, documento.idioma.id), :documento_id => documento.id, :ocurrencia => o)}
+  end
+
+  # Crear un array de terminos a partir del titulo del documento 
+  # y agruparlos con sus respectivas ocurrencias
+  #
+  # @param documento es el objeto documento creado en Documento#indexar
+  #
+  def self.llenar_cindex(documento)
+    terminos = agrupar_terminos(generar_terminos(documento.contenido.texto, documento.idioma.codigo))
+    terminos.each {|t, o| documento.cindices << Cindex.new(:termino_id => salvar_termino(t, documento.idioma.id), :documento_id => documento.id, :ocurrencia => o)}
+  end
+
+  # Crear un array de terminos a partir del resumen del documento
+  # y agruparlos con sus respectivas ocurrencias
+  #
+  # @param documento es el objeto documento creado en Documento#indexar
+  #
+  def self.llenar_rindex(documento)
+    terminos = agrupar_terminos(generar_terminos(documento.resumen, documento.idioma.codigo))
+    terminos.each {|t, o| documento.rindices << Rindex.new(:termino_id => salvar_termino(t, documento.idioma.id), :documento_id => documento.id, :ocurrencia => o)}
+  end
+
+  # Crear un array de terminos a partir de las palabras clave
+  # y agruparlas con sus respectivas ocurrencias
+  #
+  # @param documento es el objeto documento creado en Documento#indexar
+  #
+  def self.llenar_clindex(documento)
+    terminos = agrupar_terminos(generar_terminos(documento.palabras_clave, documento.idioma.codigo))
+    terminos.each {|t, o| documento.clindices << Clindex.new(:termino_id => salvar_termino(t, documento.idioma.id), :documento_id => documento.id, :ocurrencia => o)}
+  end
+
+  def limpiar_indices(documento)
+    documento.contenido.destroy     unless documento.contenido.nil?
+    documento.cindices.destroy_all  unless documento.terminos_contenido.nil?
+    documento.tindices.destroy_all  unless documento.terminos_titulo.nil?
+    documento.rindices.destroy_all  unless documento.terminos_resumen.nil?
+    documento.clindices.destroy_all unless documento.terminos_palabras_clave.nil?
+  end
+
+  def eliminar_acentos!(texto="")
+    if texto.nil?
+      texto = ""
+    end#if
+    vocales = Hash["á", "a", "é", "e", "í", "i", "ó", "o", "ú", "u",
+                   "Á", "A", "É", "E", "Í", "I", "Ó", "O", "Ú", "U",
+                   "ü", "u", "Ü", "U", "ñ", "Ñ"]
+    vocales.each do |k,v|
+      texto.gsub!(k,v)
+    end#do
+    return texto
+  end#def
+
+  # Elimina un recurso y devuleve un boolean
+  #
+  # @param recurso el recurso a ser eliminado
+  #
+  def eliminar_recurso?(resource)
+    begin
+      resource.destroy
+    rescue ActiveRecord::DeleteRestrictionError 
+      return false
+    end#begin
+    return true
+  end#def
+
+  # Crear autores  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def crear_autores(documento, parametros)
+    # El 1° autor es obligatorio para todos los documentos
+    # 1° autor
+    #
+    begin
+      documento.personas_autor.push(Persona.find(parametros[:autor][:id]))
+    rescue
+    end
+    # El 2° autor es opcional para todos los documentos 
+    # 2° autor
+    #
+    begin
+      documento.personas_autor.push(Persona.find(parametros[:autor2][:id]))
+    rescue
+    end
+
+    # El terecer autor es opcional solo para los documentos que no sean TEG o SEM
+    # 3° autor
+    #
+    unless parametros[:documento][:tipo_documento_id].to_i.between?(1,2)
+      begin
+        documento.personas_autor.push(Persona.find(parametros[:autor3][:id]))
+      rescue
+      end#begin
+    end#unless
+  end#def
+
+  # Crear tutores  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def crear_tutores(documento, parametros)
+    # El 1° tutor es obligatiorio solo para TEG y SEM
+    # 1° tutor
+    begin
+      documento.personas_tutor.push(Persona.find(parametros[:tutor][:id]))
+    rescue
+    end#begin
+
+    # el 2° tutor es opcional solo para TEG y SEM
+    # 2° tutor
+    begin
+      documento.personas_tutor.push(Persona.find(parametros[:tutor2][:id]))
+    rescue
+    end#begin
+  end#def
+
+  # Crear jurados  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def crear_jurados(documento, parametros)
+    # El 1° y el 2° jurados son obligatorios para TEG y SEM
+    # 1° jurado
+    begin
+      documento.personas_jurado.push(Persona.find(parametros[:jurado][:id]))
+    rescue
+    end#begin
+
+    # 2° jurado
+    begin
+      documento.personas_jurado.push(Persona.find(parametros[:jurado2][:id]))
+    rescue
+    end#begin
+  end#def
+
+  # Actualizar autores  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def actualizar_autores(documento, parametros)
+    # 1° autor
+    autores = Autor.where("documento_id = ?", documento.id)
+    begin
+      autores.first.update_attributes(:persona_id => parametros[:autor][:id])
+    rescue
+    end
+
+    # Si se desea eliminar el 2° autor ya que es opcional
+    if parametros[:autor2_eliminar] == "eliminar"
+      autores.second.destroy unless autores.second.nil?
+    else
+    # 2° autor
+      unless parametros[:autor2][:id] == ""
+        if  autores.size == 1
+          documento.personas_autor.push(Persona.find(parametros[:autor2][:id]))  
+        elsif autores.size == 2
+          begin
+            autores.second.update_attributes(:persona_id => parametros[:autor2][:id])
+          rescue
+          end#begin  
+        end#if
+      end#unless
+    end#if  
+
+    # Si se desea eliminar el 3° autor ya que es opcional
+    if parametros[:autor3_eliminar] == "eliminar"
+      autores.third.destroy unless autores.third.nil?
+    else
+      # 3° autor
+      unless parametros[:autor3][:id] == ""
+        if  autores.size.between?(1,2)
+          documento.personas_autor.push(Persona.find(parametros[:autor3][:id]))  
+        elsif autores.size == 3
+          begin
+            autores.third.update_attributes(:persona_id => parametros[:autor3][:id])
+          rescue
+          end#begin   
+        end#if
+      end#unless
+    end#if
+  end#def
+
+  # Crear tutores  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def actualizar_tutores(documento, parametros)
+    # 1° tutor
+    tutores = Tutor.where("documento_id = ?", documento.id)
+    if tutores.size == 0
+      begin
+        documento.personas_tutor.push(Persona.find(parametros[:tutor][:id]))
+      rescue
+      end
+    elsif tutores.size == 1 || tutores.size == 2       
+      tutores.first.update_attributes(:persona_id => parametros[:tutor][:id])        
+    end
+
+    # Si se desea eliminar el 2° tutor ya que es opcional 
+    if parametros[:tutor2_eliminar] == "eliminar" 
+      tutores.second.destroy unless tutores.second.nil?
+    end
+
+    # 2° tutor
+    unless parametros[:tutor2][:id] == ""
+      if  tutores.size == 1
+        documento.personas_tutor.push(Persona.find(parametros[:tutor2][:id]))
+      elsif tutores.size == 2
+        begin
+          tutores.second.update_attributes(:persona_id => parametros[:tutor2][:id])
+        rescue
+        end#begin   
+      end#if 
+    end#unless 
+  end#def
+
+  # Crear jurados  
+  #
+  # @param documento
+  # @param parametros son los parametros recibidos del formulario
+  #
+  def actualizar_jurados(documento, parametros)
+    # 1° jurado y 2° jurado
+    jurados = Jurado.where("documento_id = ?", documento.id)
+    if jurados.size == 0
+      begin
+        documento.personas_jurado.push(Persona.find(parametros[:jurado][:id]))
+        documento.personas_jurado.push(Persona.find(parametros[:jurado2][:id]))
+      rescue
+      end
+    elsif jurados.size == 2  
+      jurados.first.update_attributes(:persona_id => parametros[:jurado][:id]) 
+      jurados.second.update_attributes(:persona_id => parametros[:jurado2][:id]) 
+    end#if
+  end#def
+
+
+  # Consulta SQL que recupera todos los documentos relacionados con un los
+  # terminos ingresados por el usuario en la interfaz
+  #
+  # @param terminos son los terminos ingresados por el usuario
+  # @param idioma es el idioma_id del documento (1 es español)
+  #
+  # La consulta retorna un arreglo de la forma [ [doc_id1, [ [doc_id1, titulo, fecha, termino1_descripcion, o_titulo, o_contenido, o_resumen, o_palabras_clave, termino1_id, (Freq.doc1)],...]], ...,   [doc_idn,   [ [doc_idn, titulo, fecha, terminon_descripcion, o_titulo, o_contenido, o_resumen, o_palabras_clave, terminon_id, (Freq.docn)],...]]
+
+  def recuperar_documentos(terminos_array)
+
+    # Armar la clausula WHERE del query
+    #terminos = ''
+    #instr_or = ''
+    #terminos_array.each do |termino|
+    #  t = Termino.find_by_descripcion(termino)
+    #  unless t.nil?
+    #    terminos = terminos + instr_or + "ter.id = #{t.id} "
+    #    instr_or = 'OR '
+    #  end#unless
+    #end#do
+
+    # Armar la clausula WHERE del query
+    terminos = []
+    terminos_array.each do |termino|
+      t_array = Termino.find_all_by_descripcion(termino)
+      t_array.each do |t|
+        terminos = terminos.push("ter.id = #{t.id}")
+      end#do
+    end#do
+    terminos = terminos.join(' OR ')
+
+    return ActiveRecord::Base.connection.execute("  
+SELECT
+  documento.id, documento.titulo, documento.fecha_publicacion, termino.descripcion as term, SUM(res.ocurrencia_en_titulo) as ocur_ttl, 
+  SUM(res.ocurrencia_en_c) as ocur_cont, SUM(res.ocurrencia_en_r) as ocur_res, SUM(res.ocurrencia_en_pc) as ocur_pc, termino.id
+FROM
+(
+ SELECT doc.id as documento, ter.id as term, ci.ocurrencia as ocurrencia_en_titulo, 0 as ocurrencia_en_c, 0 as ocurrencia_en_r, 
+   0 as    ocurrencia_en_pc  FROM   documento AS doc,   termino AS ter,   tindex AS ci   WHERE ci.documento_id = doc.id AND 
+   ci.termino_id = ter.id AND   (#{terminos })  
+ UNION  
+ SELECT doc.id as documento, ter.id as term, 0, 0 as ocurrencia_en_c, 0 as ocurrencia_en_r, indice.ocurrencia as ocurrencia_en_pc   
+ FROM   documento AS doc,   termino AS ter,   clindex AS indice   
+ WHERE   indice.documento_id = doc.id AND indice.termino_id = ter.id AND (#{terminos})  
+ UNION
+ SELECT doc.id as documento, ter.id as term, 0, 0 as ocurrencia_en_c, indice.ocurrencia as ocurrencia_en_r, 0 as ocurrencia_en_pc   
+ FROM   documento AS doc,   termino AS ter,   rindex AS indice   
+ WHERE   indice.documento_id = doc.id AND indice.termino_id = ter.id AND (#{terminos})  
+ UNION
+ SELECT doc.id as documento, ter.id as term, 0, indice.ocurrencia as ocurrencia_en_c, 0 as ocurrencia_en_r, 0 as ocurrencia_en_pc   
+ FROM   documento AS doc,   termino AS ter,   cindex AS indice   
+ WHERE   indice.documento_id = doc.id AND indice.termino_id = ter.id AND (#{terminos})  
+) AS res
+JOIN documento ON (res.documento=documento.id)
+JOIN termino ON (res.term=termino.id)
+GROUP BY res.documento, res.term;
+
+      ")
+  end#end
+
+  # Calcula la frecuencia de un termino
+  #
+  # @param ocurrencias es un arreglo de la forma
+  # [ocurrencia_titulo, ocurrencia_contenido, ocurrencia_resumen, ocurrencia_palabras_clave]
+  #
+  def calcular_tf(ocurrencias)
+    10*ocurrencias.first                 +
+    Math.log(1 + ocurrencias.second, 10) +
+    Math.log(1 + ocurrencias.third, 2)   +
+    10*ocurrencias.fourth
+  end#end
+
+  # Calcula la frecuencia inversa de un conjunto de terminos
+  #
+  # @param terminos_ids es un arreglo de la forma
+  # [termino_id1,...,termino_idn]
+  #
+  def calcular_itf(terminos_ids)
+   d = 0
+   terminos_ids.each do |termino_id|
+     d = d + (Termino.find(termino_id).documentos_titulo.size    +
+             Termino.find(termino_id).documentos_contenido.size  +
+             Termino.find(termino_id).documentos_resumen.size    +
+             Termino.find(termino_id).documentos_palabras_clave.size)/4.0
+   end#do  
+   return (Documento.all.size.to_f) / (d/terminos_ids.size.to_f)
+  end#end 
+
+
+  # Ordena un conjunto de documentos por termino
+  #
+  # @param documentos es un hash creado de la agrupacion por documentos
+  # del objeto array MySQL que devuelve la funcion recuperar_documentos
+  #
+  def ordenar_por_frecuencia(documentos)
+    #  @hash_o  almacena la frecuencia de cada termino
+    #  ocurrente en un documento a partir de las 4 frecuencias (titulo,contenido,resumen,palabras_clave)
+    # {doc_id => [tf(termino1), ..., tf(termino n)] } 
+    # y generar @hash_terminos {doc_id => [termino_id1,...,termino_idn]}
+    # 
+    @hash_o = Hash.new 0
+    termino_o = []
+    @hash_terminos = Hash.new 0
+    documentos.each do |doc_index, doc_data|
+    @hash_terminos[doc_index] = [] 
+      doc_data.each do |data|
+      termino_o = termino_o + [ calcular_tf([data[4],data[5],data[6],data[7]]) ]
+       @hash_terminos[doc_index] = @hash_terminos[doc_index] + [data[8]]
+    end#do
+    @hash_o[doc_index] = termino_o
+      termino_o = []
+    end#do
+
+    # Con @hash_terminos se calcula el itf
+    # @hash_terminos.each do |documento,termino_ids|
+    #  @hash_terminos[documento] = calcular_itf(termino_ids)
+    # end#do
+
+    # A partir de @hash_o calcular @hash_f
+    # {doc_id => frecuencia_de_termino}
+    #
+    @hash_f = Hash.new 0
+    @hash_o.each do |doc_id,ocurrencias|
+      @hash_f[doc_id] = 0
+      ocurrencias.each do |ocurrencia|
+        @hash_f[doc_id] = @hash_f[doc_id] + ocurrencia
+      end#do
+    end#do
+
+    documentos.each do |doc_index,doc_data|
+      doc_data[0].push(@hash_f[doc_index])
+    end#do
+    documentos = documentos.sort_by { |doc_id,doc| doc.first[8] }
+  end#do
+
+  # Retorna true si hay al menos un documento indexado
+  # a al menos un termino sino retorna false
+  #
+  # @param terminos es un arreglo con la descripcion de los terminos
+  # ['datos','computacion',...,'ultimo']
+  # @param es idioma el idioma_id del documento (1 es español)
+  #
+  def hay_algun_documento_indexado?(terminos,idioma_id=1)
+    t = []
+    terminos.each do |termino|
+      unless Termino.find_by_descripcion_and_idioma_id(termino, idioma_id).nil?
+        t = t + [Termino.find_by_descripcion_and_idioma_id(termino, idioma_id)]
+      end#unless
+    end#do
+
+    return t.size != 0 ? true : false
+  end#def
+
+  # Calcula la relevancia de un conjunto de documentos
+  # a partir de sus valores
+  #
+  # @valores es un hash con la forma
+  # {id_documento => [:f_termino => valor, :descargas => valor2, :calificacion => valor3, :fecha_calificacion => valor4}]
+  #
+  def relevancia(valores)
+    valores.each do |id,arr|
+
+      arr[1][:descargas] = 10 if arr[1][:descargas].nil? || arr[1][:descargas] <= 10
+      arr[2][:calificacion] = 10 if arr[2][:calificacion] == 0
+      fecha_valor = 1 + (arr[3][:fecha_publicacion].year - 2000)/(Time.now.year - 2000)
+
+      valores[id] = arr[0][:f_termino]*Math.log(arr[1][:descargas])*(arr[2][:calificacion]/10)*fecha_valor  
+    end#do
+    return (valores.sort_by {|k,v| v}).reverse
+  end#def
+  
+end#module

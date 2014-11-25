@@ -1,0 +1,308 @@
+<script>
+function cargar_documento(doc_id){
+ $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){
+ });
+
+}
+</script>
+
+
+<%= titulo 'Busconest' %>
+
+<form class="form-search" action="busqueda_simple" method="get">
+
+  <div class="input-append">
+    <input type="text" class="span2 search-query" style="width:200%;padding-bottom:2px" name="terminos" value="<%= @terminos.join(' ') %>">
+    <button type="submit" class="btn btn-info" style="height:28px"> <i class="icon-white icon-search"></i> Buscar</button>
+  </div>
+
+  <div style="margin-top:6px">
+    <div style="display:inline; margin-right:15px; margin-left:10px">
+      <%= radio_button('busqueda', 'tipo', 'relevancia',   :checked => @relevancia, :class=>"bc_radio"  ) %>
+      <label style="margin-left:5px">Relevancia</label>
+    </div>
+    <div style="display:inline; margin-right:15px">
+      <%= radio_button('busqueda', 'tipo', 'fecha',        :checked => @fecha        ) %>
+      <label style="margin-left:5px">Fecha</label>
+    </div>
+    <div style="display:inline; margin-right:15px">
+      <%= radio_button('busqueda', 'tipo', 'calificacion', :checked => @calificacion ) %>
+      <label style="margin-left:5px">Calificación</label>
+    </div>
+  </div>
+
+</form>
+
+<span class="label label-important" style="margin-top:30px"><%= @ingresar_terminos %></span>
+
+<!-- Recuperar documentos por fecha -->
+<% unless @documentos.nil? %>
+
+  <!-- Conteo de resultados -->
+  <%= render :partial => 'mensaje_conteo_resultados', :locals => { :documentos_size => @documentos_size } %>
+
+  <% @documentos.each do |doc,datos| %>
+    <%  doc_aux = Documento.find(datos[0].first) %>
+    <div class="resultado-fila" >
+      <% if doc_aux.visibilidad.id == 1 %>
+        <h4> 
+          <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= doc_aux.id %>)" href="#">
+            <%= raw datos[0].second  %>
+          </a>
+        </h4> 
+      <% else %>
+	  <h4>
+            <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= doc_aux.id %>)" href="#">
+              <%= raw datos[0].second  %>
+            </a>
+         </h4> 
+      <% end %>
+      <div class="resultado-fila-detalles" >
+        <div style="display:inline-block; width:79%">
+          <!-- Detalles (aqui va los datos del documento) -->
+          <table>
+          <tbody>
+          <tr>
+          <td><b><%= doc_aux.escuela.descripcion.capitalize %></b></td> <td><%= doc_aux.tipo_documento.descripcion.capitalize %></td>
+          </tr>
+          <tr>
+          <td><b><%= pluralizar('Autor:','Autores:', doc_aux.personas_autor.size) %></b></td>
+          <td><% doc_aux.personas_autor.each do |persona| %>
+            <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+          <% end %></td>
+          </tr> 
+          <% if doc_aux.personas_tutor.any? %>
+          <tr>
+            <td><b><%= pluralizar('Tutor:','Tutores:', doc_aux.personas_tutor.size) %></b></td>
+            <td>
+            <% doc_aux.personas_tutor.each do |persona| %>
+              <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+            <% end %>
+            </td>
+          </tr>
+          <% end %>
+          <% if doc_aux.visibilidad.descripcion == "PUBLICO" %>
+            <tr>
+              <td><b>Descargas:</b></td> <td><%= doc_aux.descargas %></td>
+            </tr>
+          <% end %>
+          <tr>
+          <td><b>Fecha:</b></td> <td><%= "#{datos[0].third.day}-#{datos[0].third.month}-#{datos[0].third.year}"%></td>
+          </tr>
+          <!-- Fin Detalles -->
+          </tbody>
+          </table>
+        </div>
+        <div style="display:inline; text-align:right; width:21%">
+          <!-- Acciones  -->
+          <% doc = Documento.find( datos[0].first ) %>
+          <%= link_to doc, { :class => 'btn btn-info', :'data-toggle' => "modal", 
+	    :'data-target' => "#doc-info", :onclick => "cargar_documento( #{datos[0].first} )", :href =>'#' } do %>
+            <i class="icon-white icon-search"></i> Ver 
+          <% end %>
+      
+          <% if doc.visibilidad.descripcion == 'PUBLICO' %>
+            <%= link_to "/documentos/descargar/#{ doc.id}", { :class => 'btn btn-info' } do %> 
+	      <i class="icon-white icon-download"></i> Descargar 
+            <% end %>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  <% end %> <!-- end each  -->
+<% end %> <!-- end unless  -->
+
+<!-- Recuperar documentos por calificacion -->
+<% unless @documentos_c.nil? %>
+
+ <!-- Mensaje con conteo de resutados -->
+  <% unless @documentos_c_size == 0 %>
+     <% if @documentos_c_size == 1 %>
+        <span class="label label-info" style="margin-top:30px"><%= "#{@documentos_c_size} documento encontrado" %></span><br /><br /><br />
+      <% else %>
+        <span class="label label-info" style="margin-top:30px"><%= "#{@documentos_c_size} documentos encontrados" %></span><br /><br /><br />
+      <% end %>
+  <% end %>
+  <!-- Fin mensaje con conteo de resutados -->  
+
+
+  <% @documentos_c.each do |documento_c| %>
+   
+    <div class="resultado-fila" >
+      <!-- Titulo -->
+      <% if documento_c.visibilidad.id == 1 %>
+	  <h4>
+            <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento_c.id %>)" href="#">
+              <%= raw documento_c.titulo %>
+            </a>
+          </h4> 
+      <% else %>
+	  <h4>
+            <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento_c.id %>)" href="#">
+              <%= raw documento_c.titulo %>
+            </a>
+          </h4> 
+      <% end %>
+      <div class="resultado-fila-detalles" >
+        <div style="display:inline-block; width:79%">
+          <!-- Detalles (aqui va los datos del documento) -->
+          <table>
+          <tbody>
+          <tr>
+          <td><b><%= documento_c.escuela.descripcion.capitalize %></b></td> <td><%= documento_c.tipo_documento.descripcion.capitalize %></td>
+          </tr>
+          <tr>
+          <td><b><%= pluralizar('Autor:','Autores:', documento_c.personas_autor.size) %></b></td>
+          <td>
+          <% documento_c.personas_autor.each do |persona| %>
+            <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+          <% end %>
+          </td>
+          </tr>
+          <% if documento_c.personas_tutor.any? %>
+            <tr>
+            <td><b><%= pluralizar('Tutor:','Tutores:', documento_c.personas_tutor.size) %></b></td>
+            <td>
+              <% documento_c.personas_tutor.each do |persona| %>
+              <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+            <% end %>
+            </td>
+            </tr>
+          <% end %>
+          <% if documento_c.visibilidad.descripcion == "PUBLICO" %>
+            <tr>
+            <td><b>Descargas:</b></td> <td><%= documento_c.descargas %></td>
+            </tr>
+          <% end %>
+          <tr>
+          <td><b>Fecha:</b></td> <td><%= "#{documento_c.fecha_publicacion.day}-#{documento_c.fecha_publicacion.month}-#{documento_c.fecha_publicacion.year}"%></td>
+          </tr>
+          <tr>
+          <td><b>Calificación:</b></td> <td><%= documento_c.calificacion %></td>
+          </tr>
+          </tbody>
+          </table>
+          <!-- Fin Detalles -->
+        </div>
+        <div style="display:inline; text-align:right; width:21%">
+          <!-- Acciones  -->
+          <%= link_to documento_c, { :class => 'btn btn-info', :'data-toggle' => "modal", 
+	    :'data-target' => "#doc-info", :onclick => "cargar_documento( #{documento_c.id} )", :href => '#'} do %>
+            <i class="icon-white icon-search"></i> Ver 
+          <% end %>
+          <% if documento_c.visibilidad.descripcion == 'PUBLICO' %>
+            <%= link_to "/documentos/descargar/#{ documento_c.id}", { :class => 'btn btn-info' } do %> 
+	      <i class="icon-white icon-download"></i> Descargar 
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div><!-- end div resultado -->
+
+  <% end %><!-- end each -->
+<% end %><!-- end unless -->
+
+<!-- Recuperar documentos por relevancia -->
+<% unless @relevancia_v.nil? %>
+
+<!-- Mensaje con conteo de resutados -->
+  <% unless @relevancia_v_size == 0 %>
+     <% if @relevancia_v_size == 1 %>
+        <span class="label label-info" style="margin-top:30px"><%= "#{@relevancia_v_size} documento encontrado" %></span><br /><br /><br />
+      <% else %>
+        <span class="label label-info" style="margin-top:30px"><%= "#{@relevancia_v_size} documentos encontrados" %></span><br /><br /><br />
+      <% end %>
+  <% end %>
+  <!-- Fin mensaje con conteo de resutados -->  
+
+  <% @relevancia_v.each do |doc| %>
+    <div class="resultado-fila" >
+      <!-- Titulo -->
+      <% if doc.visibilidad.id == 1 %>
+	  <h4>
+            <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= doc.id %>)" href="#">
+              <%= raw doc.titulo %>
+            </a>
+          </h4> 
+      <% else %>
+	  <h4>
+            <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= doc.id %>)" href="#">
+              <%= raw doc.titulo %>
+            </a>
+          </h4> 
+      <% end %>
+      <div class="resultado-fila-detalles" >
+        <div style="display:inline-block; width:79%">
+          <!-- Detalles (aqui va los datos del documento) -->
+          <table>
+          <tbody>
+          <tr>
+          <td><b><%= doc.escuela.descripcion.capitalize %></b></td><td><%= doc.tipo_documento.descripcion.capitalize %></td>
+          </tr>
+          <tr>
+          <td><b><%= pluralizar('Autor:','Autores:', doc.personas_autor.size) %></b></td>
+          <td>
+          <% doc.personas_autor.each do |persona| %>
+            <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+          <% end %>
+          </td>
+          </tr>
+          <% if doc.personas_tutor.any? %>
+            <tr>
+            <td><b><%= pluralizar('Tutor:','Tutores:', doc.personas_tutor.size) %></b></td>
+            <td>
+            <% doc.personas_tutor.each do |persona| %>
+              <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+            <% end %>
+            </td>
+            </tr>
+          <% end %>
+          <% if doc.visibilidad.descripcion == "PUBLICO" %>
+            <tr>
+            <td><b>Descargas:</b></td> <td><%= doc.descargas %></td>
+            </tr>
+          <% end %>
+          <tr>
+          <td><b>Fecha:</b></td> <td><%= "#{doc.fecha_publicacion.day}-#{doc.fecha_publicacion.month}-#{doc.fecha_publicacion.year}"%></td>
+          </tr>
+          </tbody>
+          </table>
+          <!-- Fin Detalles -->
+        </div>
+        <div style="display:inline; text-align:right; width:21%">
+          <!-- Acciones  -->
+          <%= link_to doc, { :class => 'btn btn-info', :'data-toggle' => "modal", 
+	  :'data-target' => "#doc-info", :onclick => "cargar_documento( #{doc.id} )", :href='#'} do %>
+          <i class="icon-white icon-search"></i> Ver 
+          <% end %>
+      
+          <% if doc.visibilidad.descripcion == 'PUBLICO' %>
+          <%= link_to "/documentos/descargar/#{ doc.id}", { :class => 'btn btn-info' } do %> 
+	    <i class="icon-white icon-download"></i> Descargar 
+          <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div><!-- end div resultado -->
+
+  <% end %><!-- end each  -->
+<% end %><!-- end -->
+
+<!-- will_paginate -->
+<% unless @documentos_c.nil? %>
+  <%= render :partial => 'shared/paginacion', :locals => { :coleccion => @documentos_c } %>
+<% else %>
+  <% unless @relevancia_v.nil? %>
+    <%= render :partial => 'shared/paginacion', :locals => { :coleccion => @relevancia_v } %>
+  <% else %>
+    <% unless @documentos.nil? %>
+      <%= render :partial => 'shared/paginacion', :locals => { :coleccion => @documentos } %>
+    <% end %>
+  <% end %>
+<% end %>
+<!-- Fin will_paginate -->
+
+<!--ventana modal -->
+<%= render 'shared/modal' %>
+

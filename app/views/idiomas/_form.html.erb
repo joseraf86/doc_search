@@ -1,0 +1,36 @@
+<div class="upload_form_cont">
+
+
+<%= form_for(@idioma) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @idioma } %>'
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%", :maxlength => 25  %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label 'codigo * (minuscula)', :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :codigo, :style => "width:70%", :maxlength => 2 %>
+      <p>* El codigo del idioma segun la norma <a href="http://es.wikipedia.org/wiki/ISO_639-1" target="_blank">ISO 639-1</a></p>
+    </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to idiomas_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+
+<% end %>
+
+
+
+</div>
+
+

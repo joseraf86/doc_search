@@ -1,0 +1,5 @@
+<% titulo 'Crear Documento' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', documentos_path %>

@@ -1,0 +1,56 @@
+<%= titulo 'Directorio - Biologia' %>
+<script>
+
+$(document).ready(function(){
+  $("#doc-info").dialog(
+              { autoOpen:false,
+                height:500, 
+                width:"70%", 
+                draggable:false,
+                resizable:false,
+                modal:true,
+                buttons:[{text:"cerrar", click:function(){$(this).dialog("close");}}]
+               }
+   );
+  $(".ver-info").button().click(function(){$("#doc-info").dialog("open");});
+});
+
+
+function cargar_documento(doc_id){
+  $("#doc-info").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){});
+}
+</script>
+
+
+<% @documentos_escuelas.each do |documento| %>
+  <table border="1">
+  <tr>
+    <th>Titulo</th>
+    <th>Autores</th>
+    <th>Tipo</th>
+    <th>Año</th>
+    <th>Detalles</th>
+    <th>Archivo</th>
+  </tr>
+  <tr>
+  <td><%= documento.titulo %></td>
+  <td>
+   <% documento.autors.each do |autor| %>
+     <%= autor.persona.nombre_completo %><br/>
+   <% end %>
+  </td>
+  <td><%= documento.tipo_documento.descripcion_corta %></td>
+  <td><%= documento.fecha_publicacion.year %></td>
+  <td>
+    <button class="ver-info" onclick="cargar_documento(<%= documento.id %>)"> ver detalles </button>
+  </td>
+  <td>
+    <% if documento.visibilidad.descripcion == 'PUBLICO' %>
+      <a href="<%= documento.publicacion.url %>">Descargar</a>
+    <% end %>
+  </td>
+  </tr>
+  </table> 
+<% end %>
+
+<div id="doc-info" title="Detalles"></div>

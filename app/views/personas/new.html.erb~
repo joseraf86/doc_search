@@ -1,0 +1,5 @@
+<% titulo 'Crear Persona' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', personas_path %>

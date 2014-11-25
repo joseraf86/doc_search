@@ -1,0 +1,25 @@
+
+<div class="grid-row" >
+  <div class="values"><h3><%=  @persona.nombre_completo %></h3></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Cedula:</div> 
+  <div class="values"><%=  @persona.cedula %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Nombres:</div> 
+  <div class="values"><%=  @persona.nombres %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Apellidos:</div> 
+  <div class="values"><%=  @persona.apellidos %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Email:</div> 
+  <div class="values"><%=  @persona.email %></div> 
+</div>
+

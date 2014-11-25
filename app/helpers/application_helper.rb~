@@ -1,0 +1,38 @@
+module ApplicationHelper
+  # Imprime un texto en singular o plural segun sea el caso
+  #
+  # @param singular es el texto en singular
+  # @param plural es el texto en plural
+  # @param tamano 1 para singular cualquier otro valor plural
+  #
+  def pluralizar(singular, plural, tamano)
+    if tamano == 1
+      return singular
+    else
+      return plural
+    end#if
+  end#def
+
+  # Permite imprimir la clase CSS de los atributos
+  # de las etiquetas HTML para los casos de error
+  #
+  # @param recurso es un objeto ActiveRecord::Base
+  # 
+  def error_css(error)
+    if error.any?
+      "field_with_errors"
+    else
+      "field"
+    end#if
+  end#def
+
+  # Permte configurar la etiqueta <title> de las paginas
+  # en el layout general desde los templates particulares 
+  # de los controladores
+  #
+  # @param subtitulo
+  # 
+  def titulo(texto)  
+    content_for(:titulo) { texto }  
+  end#def
+end#module

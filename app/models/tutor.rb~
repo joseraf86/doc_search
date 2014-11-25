@@ -1,0 +1,5 @@
+class Tutor < ActiveRecord::Base
+  belongs_to :persona
+  belongs_to :documento
+  attr_accessible :persona_id
+end

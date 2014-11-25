@@ -1,0 +1,20 @@
+es:
+  will_paginate:
+    previous_label: "«"
+    next_label: "»"
+    page_gap: "&hellip;"
+
+    page_entries_info:
+      single_page:
+        zero:  "No %{model} encontrado"
+        one:   "Desplegando 1 %{model}"
+        other: "Desplegando todo %{count} %{model}"
+      single_page_html:
+        zero:  "No %{model} encontrado"
+        one:   "Desplegando <b>1</b> %{model}"
+        other: "%{count} elementos"
+
+      multi_page: "Desplegando %{model} %{from} - %{to} of %{count} en total"
+      multi_page_html: "%{from}&nbsp;-&nbsp;%{to} de %{count} elementos"
+
+

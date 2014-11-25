@@ -1,0 +1,25 @@
+<%= form_for(@tipo_documento) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @tipo_documento } %>'
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%"  %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :descripcion_corta, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion_corta, :maxlength => 12 %>
+    </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to tipo_documentos_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+<% end %>

@@ -1,0 +1,13 @@
+<!-- Ventana Modal -->
+<div id="doc-info" class="modal hide fade" title="Detalles">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Detalles</h3>
+  </div>
+  <div id="doc-info-body" class="modal-body">
+     <!-- contenido (se carga por ajax) -->
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+  </div>
+</div>

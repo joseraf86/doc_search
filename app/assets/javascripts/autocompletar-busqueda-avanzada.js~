@@ -1,0 +1,111 @@
+$(function(){
+  var personas = {};
+  var nombres = [];
+  $("#autor-busqueda-avanzada").typeahead({
+                minLength: 3,
+                items: 30,
+		source: function ( query, process ) {
+		        //get the data to populate the typeahead (plus an id value)
+			$.ajax({url: 'http://192.168.1.103:3001/personas/autocompletar_personas.json',
+                               cache: true,
+                               data: {'query': query, 'tipo_de_persona':'autor' },
+                               success: function(data){
+                                        //reset these containers every time the user searches
+                                        //because we're potentially getting entirely different results from the api
+                                         personas = {};
+                                         nombres = [];
+                                         //var json = JSON.parse( data );
+                                         for(var i in data) {
+                                           //console.log(data[i]);
+                                           nombres.push( data[i].nombre_completo ) 
+                                           personas[data[i].nombre_completo] = data[i].id;
+                                         }
+					 //send the array of results to bootstrap for display
+					 process( nombres );
+                                        },
+                         });
+                },
+                matcher: function () { return true; },
+                updater: function ( selectedName ) {
+                        //save the id value into the hidden field
+                        $( "#autor_id" ).val( personas[ selectedName ] );
+                        //return the string you want to go into the textbox (the name)
+                        return selectedName;
+                        }
+                });
+  });
+
+$(function(){
+  var personas = {};
+  var nombres = [];
+  $("#tutor-busqueda-avanzada").typeahead({
+                minLength: 3,
+                items: 30,
+		source: function ( query, process ) {
+		        //get the data to populate the typeahead (plus an id value)
+			$.ajax({url: 'http://192.168.1.103:3001/personas/autocompletar_personas.json',
+                               cache: false,
+                               data: {'query': query, 'tipo_de_persona':'tutor' },
+                               success: function(data){
+                                        //reset these containers every time the user searches
+                                        //because we're potentially getting entirely different results from the api
+                                         personas = {};
+                                         nombres = [];
+                                         //var json = JSON.parse( data );
+                                         for(var i in data) {
+                                           //console.log(data[i]);
+                                           nombres.push( data[i].nombre_completo ) 
+                                           personas[data[i].nombre_completo] = data[i].id;
+                                         }
+					 //send the array of results to bootstrap for display
+					 process( nombres );
+                                        },
+                         });
+                },
+                matcher: function () { return true; },
+                updater: function ( selectedName ) {
+                        //save the id value into the hidden field
+                        $( "#tutor_id" ).val( personas[ selectedName ] );
+                        //return the string you want to go into the textbox (the name)
+                        return selectedName;
+                        }
+                });
+  });
+
+$(function(){
+  var personas = {};
+  var nombres = [];
+  $("#jurado-busqueda-avanzada").typeahead({
+                minLength: 3,
+                items: 30,
+		source: function ( query, process ) {
+		        //get the data to populate the typeahead (plus an id value)
+			$.ajax({url: 'http://192.168.1.103:3001/personas/autocompletar_personas.json',
+                               cache: false,
+                               data: {'query': query, 'tipo_de_persona':'jurado' },
+                               success: function(data){
+                                        //reset these containers every time the user searches
+                                        //because we're potentially getting entirely different results from the api
+                                         personas = {};
+                                         nombres = [];
+                                         //var json = JSON.parse( data );
+                                         for(var i in data) {
+                                           //console.log(data[i]);
+                                           nombres.push( data[i].nombre_completo ) 
+                                           personas[data[i].nombre_completo] = data[i].id;
+                                         }
+					 //send the array of results to bootstrap for display
+					 process( nombres );
+                                        },
+                         });
+                },
+                matcher: function () { return true; },
+                updater: function ( selectedName ) {
+                        //save the id value into the hidden field
+                        $( "#jurado_id" ).val( personas[ selectedName ] );
+                        //return the string you want to go into the textbox (the name)
+                        return selectedName;
+                        }
+                });
+  });
+

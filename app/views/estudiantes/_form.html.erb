@@ -1,0 +1,85 @@
+<script> 
+window.onload = function(){ 
+                  document.getElementById('persona').value = document.getElementById('nombre_completo_persona').value;
+                  document.getElementById('persona_id').value = document.getElementById('hidden_persona_id').value;
+                };
+</script>
+
+<% unless @estudiante.persona.nil? %> 
+  <%= hidden_field_tag :nombre_completo_persona,   @estudiante.persona.nombre_completo %>
+  <%= hidden_field_tag :hidden_persona_id,         @estudiante.persona.id %>
+<% end %>
+
+<%= form_for(@estudiante) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @estudiante } %>
+
+  <div class="control-group">
+    <%= label_tag :persona, 'Persona', :class => "control-label" %> <br />
+    <div class="controls">
+      <input id="persona" type="text" autocomplete="off" data-provide="typeahead" style="width:40%;" />
+      <input id="persona_id" name="persona[id]" value="" type="hidden"/>
+    <div>
+  </div>
+
+  <br/>
+
+  <div class="control-group">
+    <%= f.label :escuela, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.select("escuela_id", Escuela.all.collect {|p| [ p.descripcion, p.id ] }) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :grado, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.select("grado_id", Grado.all.collect {|p| [ p.descripcion, p.id ] }) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :mencion, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.select("mencion_id", Mencion.all.collect {|p| [ p.descripcion, p.id ] }, :include_blank => true) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :promedio_general, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.number_field :promedio_general, :maxlength => 7 %>
+    </div>
+  </div>
+
+  <div class="control-group"  >
+    <div class="control-group" style="display:inline; width:33%">
+    <%= f.label :promedio_ponderado, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.number_field :promedio_ponderado, :maxlength => 7 %>
+    </div>
+  </div>
+
+  <div class="control-group"  style="display:inline; width:33%">
+    <%= f.label :eficiencia, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.number_field :eficiencia, :maxlength => 6  %>
+    </div>
+  </div>
+
+  <div class="control-group"  style="display:inline; width:33%">
+    <%= f.label :premio, :style => "", :class => "control-label" %>
+    <div class="controls">
+      <%= f.select("premio_id", Premio.all.collect {|p| [ p.descripcion, p.id ] }, :include_blank => true, :style => "width:240px;" )  %>
+    </div>
+  </div>
+  </div>
+
+  <div class="control-group" style = "text-align:right; width:70%">
+    <%= link_to estudiantes_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+
+<% end %>

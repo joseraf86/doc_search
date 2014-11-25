@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  titulo: MyString
+  resumen: MyText
+  fecha_publicacion: 2013-03-02
+  palabras_clave: MyString
+  escuela: 
+  tipo_documento: 
+  estado_documento: 
+  idioma: 
+  visibilidad: 
+
+two:
+  titulo: MyString
+  resumen: MyText
+  fecha_publicacion: 2013-03-02
+  palabras_clave: MyString
+  escuela: 
+  tipo_documento: 
+  estado_documento: 
+  idioma: 
+  visibilidad: 

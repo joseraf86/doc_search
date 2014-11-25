@@ -1,0 +1,6 @@
+class Busqueda < ActiveRecord::Base
+
+  # 10 documentos por pagina (will_paginate setting)
+  self.per_page = 2
+
+end

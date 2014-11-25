@@ -1,0 +1,86 @@
+<script>
+
+function cargar_documento(doc_id){
+ $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){
+ });
+
+}
+
+</script>
+
+<%if @categoria == 'TIPOS' %>
+  <%= titulo 'Directorio - Documentos por Tipos' %>
+<%elsif @categoria == 'FECHAS' %>
+  <%= titulo 'Directorio - Documentos por Años' %>
+<% end %>
+
+<% if @documentos_escuelas.any? %>
+
+<% @documentos_escuelas.each do |tipo, documentos| %>
+  <% if @categoria == 'TIPOS'%> 
+   <h2><%= TipoDocumento.find(tipo).descripcion %></h2>
+  <% elsif @categoria == 'FECHAS' %>
+    <h2><%= tipo %></h2>
+  <% end %>
+  <table class="table table-striped tabla">
+    <thead  class="head-blue">
+      <tr>
+        <th>Titulo</th>
+        <th>Autores</th>
+        <th>Tipo</th>
+        <th>Año</th>
+        <th>Detalles</th>
+        <th>Archivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% documentos.each do |documento| %>
+      <tr>
+        <td><%= documento.titulo %></td>
+        <td>
+        <% documento.autors.each do |autor| %>
+          <%= autor.persona.nombre_completo %><br/>
+        <% end %>
+        </td>
+        <td><%= documento.tipo_documento.descripcion_corta %></td>
+        <td><%= documento.fecha_publicacion.year %></td>
+        <td>
+          <%= link_to documento, { :class => 'btn btn-info', :style => "color:white", :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_documento( #{documento.id} )"} do %>
+            <i class="icon-white icon-search"></i> Ver 
+          <% end %>
+        </td>
+        <td>
+        <% if documento.visibilidad.descripcion == 'PUBLICO' %>
+          <%= link_to "/documentos/descargar/#{ documento.id}", { :class => 'btn btn-info', :style => "color:white"} do %> 
+	    <i class="icon-white icon-download"></i> Descargar 
+          <% end %>
+        <% end %>
+        </td>
+      </tr>
+  <% end %>
+  </tbody>
+  </table> 
+<% end %>
+<% else %>
+  no hay documentos
+<% end %>
+
+<%= link_to directorio_path, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-arrow-left"></i> Volver 
+<% end %>
+
+<!-- Ventana Modal -->
+<div id="doc-info" class="modal hide fade" title="Detalles">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Detalles</h3>
+  </div>
+  <div id="doc-info-body" class="modal-body">
+     <!-- contenido (se carga por ajax) -->
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+  </div>
+</div>
+
+

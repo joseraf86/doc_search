@@ -1,0 +1,262 @@
+<%= titulo "Dashboard" %>
+
+<h3> DOCUMENTOS </h3> 
+
+<%= link 'volver', admin_path %>
+
+<h4> Estado general </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Documentos</th>
+      <th>Totales</th>
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td><b>repositorio</b></td> 
+        <td><b><%= @documentos_totales %></b></td>
+      </tr>
+      <tr>
+        <td>indexados</td> 
+        <td><%= @documentos_indexados_totales %> </td>
+      </tr>
+      <tr>
+        <td>nuevos</td> 
+        <td><%= @documentos_nuevos_totales %></td>
+      </tr>
+      <tr>
+        <td>publicos</td> 
+        <td><%= @documentos_publicos_totales %></td>
+      </tr>
+      <tr>
+        <td>privados</td> 
+        <td><%= @documentos_privados_totales %></td>
+      </tr>
+
+  </tbody>
+</table>
+
+<h4> Documentos por escuela </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Escuelas</th>
+      <th>Documentos</th>
+    </tr>
+  </thead>
+    <tbody>
+      <% @documentos_escuela_hash.each do |escuela, cantidad_documentos| %>
+      <tr>
+        <td><%= escuela %></td>
+        <td><%= cantidad_documentos %></td>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
+<%= "#{pluralizar('Escuela','Escuelas',@escuelas_max.size)}
+ con más documentos (#{@escuelas_max.values.first}) #{@escuelas_max.keys.join(', ')}" %>
+
+
+<h4> Documentos por areas </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Areas</th>
+      <th>Documentos</th>
+    </tr>
+  </thead>
+    <tbody>
+      <% @documentos_area_hash.each do |area, cantidad_documentos| %>
+      <tr>
+        <td><%= area %></td>
+        <td><%= cantidad_documentos %></td>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
+<%= "#{pluralizar('Area','Areas',@areas_max.size)}
+con más documentos (#{@areas_max.values.first}): #{@areas_max.keys.join(', ')}" %>
+
+
+<h4> Documentos por tipo de documento </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Tipos de documentos</th>
+      <th>Documentos</th>
+    </tr>
+  </thead>
+    <tbody>
+      <% @documentos_tipo_hash.each do |tipo, cantidad_documentos| %>
+      <tr>
+        <td><%= tipo %></td>
+        <td><%= cantidad_documentos %></td>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
+<%= "#{pluralizar('Tipo de documento','Tipos de documentos',@tipos_max.size)}
+con más documentos (#{@tipos_max.values.first}): #{@tipos_max.keys.join(', '.html_safe)}" %>
+
+<h3> PERSONAS </h3>
+
+<h4> Estado general </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Tipos de Personas</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td>Personas registradas</td>
+        <td><%= Persona.all.size %></td>
+      </tr>
+      <tr>
+        <td>Estudiantes</td>
+        <td><%= Estudiante.all.size %></td>
+      </tr>
+      <tr>
+        <td>Autores</td>
+        <td><%= Autor.all.group_by {|autor| autor.persona_id}.size %></td>
+      </tr>
+      <tr>
+        <td>Tutores</td>
+        <td><%= Tutor.all.group_by {|tutor| tutor.persona_id}.size %></td>
+      </tr>
+      <tr>
+        <td>Jurados</td>
+        <td><%= Jurado.all.group_by {|jurado| jurado.persona_id}.size %></td>
+      </tr>
+  </tbody>
+</table>
+
+
+<h4> Personas destacadas </h4>
+<%= "#{pluralizar('Autor', 'Autores', @autores_maximo.size)} con más documentos (#{@autores_maximo.first.second})" %>
+<ul>
+<% @autores_maximo.each do |autor| %>
+  <li><%= " #{autor.first}" %></li>
+<% end %>
+</ul>
+
+<%= "#{pluralizar('Tutor', 'Tutores', @tutores_maximo.size)} con más documentos (#{@tutores_maximo.first.second})" %>
+<ul>
+<% @tutores_maximo.each do |tutor| %>
+  <li><%= " #{tutor.first}" %></li>
+<% end %>
+</ul>
+
+<%= "#{pluralizar('Jurado', 'Jurados', @jurados_maximo.size)} con más documentos (#{@jurados_maximo.first.second})" %>
+<ul>
+<% @jurados_maximo.each do |jurado| %>
+  <li><%= " #{jurado.first}" %></li>
+<% end %>
+</ul>
+
+<h3> NOTAS </h3>
+
+<h4> Estado general </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Documentos</th>
+      <th>Cantidad</th>
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td>Calificados</td>
+        <td><%= @documentos_calificados_totales %></td>
+      </tr>
+      <tr>
+        <td>No calificados</td>
+        <td><%= @documentos_no_calificados_totales %></td>
+      </tr>
+  </tbody>
+</table>
+
+
+<h4> Promedios TEG </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>TEG</th>
+      <th>Promedio</th>
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td><b>Ciencias</b></td>
+        <td><b><%= if @promedio_TEG_ciencias != 0.0 then @promedio_TEG_ciencias else "no hay trabajos especiales de grados" end %></b></td>
+      </tr>
+    <% @promedios_TEG_escuelas_hash.each  do |escuela, promedio| %>
+      <tr>
+      <td><%= escuela %></td>
+      <% unless promedio == 0.0 %>
+        <td><%= promedio %></td>
+      <% else %>
+        <td><%= " sin documentos" %></td>
+      <% end %>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
+
+
+<h4> Promedios SEM </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>SEM</th>
+      <th>Promedio</th>
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td><b>Ciencias</b></td>
+        <td><b><%= if @promedio_SEM_ciencias != 0.0 then @promedio_SEM_ciencias else "no hay seminarios" end %></b></td>
+      </tr>
+    <% @promedios_SEM_escuelas_hash.each  do |escuela, promedio| %>
+      <tr>
+      <td><%= escuela %></td>
+      <% unless promedio == 0.0 %>
+        <td><%= promedio %></td>
+      <% else %>
+        <td><%= " sin documentos" %></td>
+      <% end %>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
+
+
+<h4> Rango de calificaciones </h4>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Documentos</th>
+      <% @teg_rangos.each do |rango, teg|%>
+      <th><%= rango.join('-') %></th>
+      <% end %>       
+    </tr>
+  </thead>
+    <tbody>
+      <tr>
+        <td><b>TEG</b></td>
+        <% @teg_rangos.each do |rango, teg|%>
+          <td><%= teg %></td>
+         <% end %>  
+      </tr>
+      <tr>
+        <td><b>SEM</b></td>
+        <% @sem_rangos.each do |rango, sem|%>
+          <td><%= sem %></td>
+         <% end %>  
+      </tr>
+  </tbody>
+</table>
+
+

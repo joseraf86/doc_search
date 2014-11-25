@@ -1,0 +1,6 @@
+<% if coleccion.size >= 10 %>
+  <div class="apple_pagination">
+      <div><%= page_entries_info coleccion, :container => false %></div>
+      <div><%= will_paginate     coleccion, :container => false %></div>
+  </div>
+<% end %>

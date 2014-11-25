@@ -1,0 +1,65 @@
+<% titulo 'Estudiante' %>
+
+<div class="grid-row" >
+  <div class="labels">Cedula:</div> 
+  <div class="values"><%=  @estudiante.persona.cedula %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Persona:</div> 
+  <div class="values"><%=  @estudiante.persona.nombre_completo %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Escuela:</div> 
+  <div class="values"><%=  @estudiante.escuela.descripcion %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Grado:</div> 
+  <div class="values"><%=  @estudiante.grado.descripcion %></div> 
+</div>
+
+<% unless @estudiante.mencion.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Mencion:</div> 
+    <div class="values"><%=  @estudiante.mencion.descripcion %></div> 
+  </div>
+<% end %>
+
+<div class="grid-row" >
+  <div class="labels">Promedio general:</div> 
+  <div class="values"><%=  @estudiante.promedio_general %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Promedio ponderado:</div> 
+  <div class="values"><%=  @estudiante.promedio_ponderado %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Eficiencia:</div> 
+  <div class="values"><%=  @estudiante.eficiencia %></div> 
+</div>
+
+<% unless @estudiante.premio.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Premio:</div> 
+    <div class="values"><%=  @estudiante.premio %></div> 
+  </div>
+<% end %>
+
+<br />
+
+<nav>
+  <%= link_to estudiantes_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_estudiante_path(@estudiante), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>
+

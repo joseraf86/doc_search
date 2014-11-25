@@ -1,0 +1,33 @@
+CAMBIAR URL de 127.0.0.1:3001 ---> <host>:3001 BUSCONEST 2
+               127.0.0.1:300  ---> <host>:3000 CONEST dummy
+AUTOCOMPLETAR
+
+BUSCONEST 2
+Búsqueda Avanzada (/app/assets/javascripts/autopletar-busqueda-avanzada.js) 9,46,83
+
+Admin-Crear & Editar estudiante (/app/assets/javascripts/autocompletar-estudiantes.js) 9
+
+Admin-Crear & Editar documento (app/assets/javascripts/autocompletar-documento.js) 14,56,98,136,173,210,247
+
+Admin-redirects luego de subir metadatos desde CONEST (/app/controllers/documento.rb) 669,769,781,788
+
+Admin-barra de progreso para subir PDF (/app/assets/javascripts/script.js) 93 (esta relativa, ya funciona)
+
+
+CONEST (dummy)
+
+Subir TEG (formulario etapa 1) (/app/assets/javascripts/autocompletar.js) 9
+
+Formulario etapa 1 (solicitar metadatos) (/app/views/busconest_modulo/subir_teg.html.erb) 43
+
+Formulario etapa 2 (solicitar documento PDF) (/app/views/busconest_modulo/guardar_pdf.html.erb) 10
+
+barra de progreso para subir PDF (/app/assets/javascripts/script.js) 130
+
+fallback del autocompletar pareja (/app/views/busconest_modulo/autocompletar_pareja.html.erb) 2
+
+
+
+
+
+

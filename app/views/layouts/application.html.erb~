@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Busconest - <%= yield(:titulo) || "Facultad de Ciencias - UCV"  %></title>  
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+
+
+<!-- Le styles -->
+<style>
+body {
+   padding-top: 65px;
+}
+</style>
+
+</head>
+<body>
+
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+	<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+	</a>
+	<div class="">
+	   <p class="navbar-text" style="color:white;margin-right:20px;">
+             <a href=/busqueda_simple style="color:white; margin-right:20px;margin-left:20px;">Búsqueda Simple</a>
+             <a href=/busqueda_avanzada style="color:white; margin-right:20px;">Búsqueda Avanzada</a>
+             <a href=/directorio style="color:white; margin-right:20px;">Directorio</a>
+            <%= yield :admin_sesion %>
+
+ 
+           </p> 
+	</div><!--/.nav-collapse -->
+  </div>
+</div>
+
+<div class="container">
+
+  <%= yield :admin_titulo %>
+
+  <div id="notice"> <p class="notice"><%= notice %></p></div>
+  <div id="alert"> <p class="notice"><%= alert %> </p></div>
+
+  <div style="padding: 12px" >
+    <h2 style="margin-bottom:25px;" ><%= yield :titulo %></h2>
+    <%= yield %>
+  </div>
+
+</div> <!-- /container -->
+
+
+</body>
+</html>

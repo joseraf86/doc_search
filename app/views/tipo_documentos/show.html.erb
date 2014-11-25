@@ -1,0 +1,23 @@
+<% titulo 'Tipo de Documento' %>
+
+<div class="grid-row" >
+  <div class="labels">Descripcion:</div> 
+  <div class="values"><%=  @tipo_documento.descripcion %></div> 
+</div>
+
+<div class="grid-row" >
+   <div class="labels">Descripcion corta:</div> 
+   <div class="values"><%= @tipo_documento.descripcion_corta %></div> 
+</div>
+<br />
+<nav>
+  <%= link_to tipo_documentos_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_tipo_documento_path(@tipo_documento), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>

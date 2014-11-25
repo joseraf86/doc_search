@@ -1,0 +1,6 @@
+module BusquedasHelper
+
+  def busqueda_simple
+   return 'busquedas/busqueda_simple'
+  end
+end

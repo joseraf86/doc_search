@@ -1,0 +1,5 @@
+class Calificacion < ActiveRecord::Base
+  belongs_to :documento
+  validates :nota, :presence => true, :numericality => true
+  attr_accessible :nota
+end

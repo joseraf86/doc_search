@@ -1,0 +1,152 @@
+<div class="grid-row" >
+  <div class="values"><h3><%= @documento.titulo %></h3></div> 
+</div>  
+
+<div class="grid-row" >
+  <div class="labels">Escuela:</div> 
+  <div class="values"><%=  @documento.escuela.descripcion %></div> 
+</div>  
+
+<div class="grid-row" >
+   <div class="labels">Tipo:</div> 
+   <div class="values"><%= @documento.tipo_documento.descripcion %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Idioma:</div> 
+  <div class="values"><%=  @documento.idioma.descripcion  %></div> 
+</div>  
+
+<div class="grid-row" >
+  <div class="labels"><%= pluralizar("Autor:","Autores:", @documento.personas_autor.length) %></div> 
+  <div class="values">
+    <ul>
+      <% @documento.personas_autor.each do |autor| %>
+        <li><%= autor.nombre_completo %></li>
+      <% end %>
+    </ul>
+  </div> 
+</div>
+
+<% if @documento.personas_tutor.any? %>
+  <div class="grid-row" >
+    <div class="labels"><%= pluralizar("Tutor:","Tutores:", @documento.personas_tutor.length) %></div> 
+    <div class="values">
+      <ul>
+        <% @documento.personas_tutor.each do |tutor| %>
+          <li><%= tutor.nombre_completo %></li>
+        <% end %>
+      </ul>
+    </div> 
+  </div>
+<% end %>
+
+<% if @documento.personas_jurado.any? %>
+  <div class="grid-row" >
+    <div class="labels"><%= pluralizar("Jurado:","Jurados:", @documento.personas_jurado.length) %></div> 
+    <div class="values">
+      <ul>
+        <% @documento.personas_jurado.each do |jurado| %>
+          <li><%= jurado.nombre_completo %></li>
+        <% end %>
+      </ul>
+    </div> 
+  </div>
+<% end %>
+
+<% if @documento.areas.any? %>
+<div class="grid-row" >
+  <div class="labels"><%= pluralizar("Area:","Areas:", @documento.areas.length) %></div> 
+  <div class="values">
+    <ul>
+      <% @documento.areas.each do |area| %>
+        <li><%= area.descripcion %></li>
+      <% end %>
+    </ul>
+  </div> 
+</div>
+<% end %>
+
+<div class="grid-row" >
+  <div class="labels">Fecha:</div> 
+  <div class="values"><%=  @documento.fecha_publicacion %></div> 
+</div>  
+
+<div class="grid-row" >
+  <div class="labels">Idioma:</div> 
+  <div class="values"><%=  @documento.idioma.descripcion  %></div> 
+</div>  
+
+<div class="grid-row" >
+  <div class="labels">Palabras clave:</div> 
+  <div class="values"><%= @documento.palabras_clave  %></div> 
+</div>  
+
+<% unless @documento.calificacion == 0 %>
+  <div class="grid-row" >
+    <div class="labels">Calificacion:</div> 
+    <div class="values"><%= @documento.calificacion   %></div> 
+  </div> 
+<% end %>
+
+<% if @documento.reconocimientos.any? %>
+<div class="grid-row" >
+  <div class="labels"><%= pluralizar("Premio:","Premios:", @documento.reconocimientos.length) %></div> 
+  <div class="values">
+    <ul>
+      <% @documento.reconocimientos.each do |reconocimiento| %>
+        <li><%= reconocimiento.descripcion %></li>
+      <% end %>
+    </ul>
+  </div> 
+</div>
+<% end %>
+
+<div class="grid-row" >
+  <div class="labels">Visibilidad:</div> 
+  <div class="values"><%= @documento.visibilidad.descripcion %></div> 
+</div>  
+
+<div class="grid-row" >
+  <div class="labels">Estado documento:</div> 
+  <div class="values"><%= @documento.estado_documento.descripcion %></div> 
+</div>  
+
+<% unless @documento.paginas.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Paginas:</div> 
+    <div class="values"><%= @documento.paginas %></div> 
+  </div> 
+<% end %>
+
+<% unless @documento.descargas.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Descargas:</div> 
+    <div class="values"><%= @documento.descargas %></div> 
+  </div>
+<% end %>
+
+<div class="grid-row" >
+  <div class="labels">Publicacion:</div> 
+  <div class="values"><a class="btn-link desc" href="<%= "descargar/#{@documento.id}" %>">Descargar</a></div> 
+</div> 
+
+<div class="grid-row" >
+  <div class="labels">Resumen:</div> 
+  <div class="values"><%= @documento.resumen %></div> 
+</div> 
+
+<br />
+
+<nav>
+  <%= link_to documentos_path, { :class => 'btn-black', :style => "color:white;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_documento_path(@documento), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>
+

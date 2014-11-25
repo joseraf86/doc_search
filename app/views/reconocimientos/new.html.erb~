@@ -1,0 +1,5 @@
+<% titulo 'Nuevo Reconocimiento' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', reconocimientos_path %>

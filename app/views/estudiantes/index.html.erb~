@@ -1,0 +1,62 @@
+
+<script>
+function cargar_estudiante(est_id){
+ $("#doc-info-body").load("/estudiantes/"+est_id+"/datos_estudiante" , function(response,status,xhr){
+ });
+
+}
+</script>
+
+<% titulo 'Estudiantes' %>
+
+<%= link_to  new_estudiante_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear Estudiante
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead  class="head-blue">
+  <tr>
+    <th>Cedula</th>
+    <th>Nombre</th>
+    <th>Escuela</th>
+    <th>Promedio<br/>general</th>
+    <th>Promedio<br/>ponderado</th>
+    <th>Eficiencia</th>
+    <th style="width:30%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @estudiantes.each do |estudiante| %>
+  <tr>
+    <td><%= estudiante.persona.cedula %></td>
+    <td><%= link_to estudiante, { :class => 'desc btn-link', :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_estudiante(#{estudiante.id})"} do %>
+          <%= "#{estudiante.persona.apellidos}, #{estudiante.persona.nombres}" %>
+        <% end %>
+    </td>
+    <td><%= estudiante.escuela.descripcion %></td>
+    <td><%= estudiante.promedio_general %></td>
+    <td><%= estudiante.promedio_ponderado %></td>
+    <td><%= estudiante.eficiencia %></td>
+    <td>
+      <%= link_to estudiante, { :class => 'btn-small btn-info', :style => "color:white", :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_estudiante(#{estudiante.id})", :href => "#"} do %>
+         <i class="icon-white icon-search"></i> Ver 
+      <% end %>
+
+        <%= link_to edit_estudiante_path(estudiante), { :class => 'btn-small btn-info', :style => "color:white"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+        <% end %>
+        <%= link_to estudiante, { :class => 'btn-small btn-danger', :style => "color:white", method: :delete,  
+	 data: { confirm: "¿Estas seguro que quieres eliminar #{estudiante.persona.nombre_completo}, #{estudiante.persona.cedula}?"} } do %> 
+          <i class="icon-white icon-remove"></i> Eliminar 
+        <% end %>
+    </td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @estudiantes } %>
+
+<%= render 'shared/modal' %>
+

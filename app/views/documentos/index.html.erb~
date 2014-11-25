@@ -1,0 +1,102 @@
+<script>
+
+function cargar_documento(doc_id){
+ $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){
+ });
+
+}
+
+</script>
+
+
+<% titulo 'Documentos' %>
+
+<%= link_to  new_documento_path, { :class => 'btn-black', :style => "color:white;"} do %>
+  <i class="icon-white icon-plus"></i> Crear documento 
+<% end %>
+<br/><br/>
+
+<table class="table table-striped tabla">
+  <thead class="head-blue">
+  <tr>
+    <th style="width:50%">Titulo</th>
+    <th style="width:10%">Escuela</th>
+    <th style="width:10%">Tipo de<br/>Documento</th>
+    <th style="width:10%">Fecha de<br/>Publicacion</th>
+    <th style="width:20%">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+<% @documentos.each do |documento| %>
+  <tr class="
+	<% if documento.estado_documento.id == 1 %>
+	  bg-nuevo
+        <% else %>
+	  bg-viejo
+        <% end %>
+      ">
+    <td>
+	<% if documento.visibilidad.id == 1 %>
+	  <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+            <%= documento.titulo %>
+          </a>
+        <% else %>
+	  <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+            <%= raw documento.titulo %>
+          </a>
+        <% end %>
+    </td>
+    <td><%= documento.escuela.descripcion %></td>
+    <td><%= documento.tipo_documento.descripcion_corta %></td>
+    <td><%= "#{documento.fecha_publicacion.day}/#{documento.fecha_publicacion.month}/#{documento.fecha_publicacion.year}" %></td>
+    <td>
+      <div style="height:28px;width:350px;" >
+        <div class="span2" style="display:inline; padding-right:4px;width:100px">
+          <%= link_to documento, { :class => 'btn-small btn-info', :style => "color:white;", :'data-toggle' => "modal", :'data-target' => "#doc-info", :onclick => "cargar_documento( #{documento.id} )", :href => "#"} do %>
+          <i class="icon-white icon-search"></i> Ver 
+          <% end %>
+        </div>
+
+        <div class="span2" style="display:inline; padding-right: 4px;width:100px">
+        <%= link_to edit_documento_path(documento), { :class => 'btn-small btn-info', :style => "color:white;"} do %> 
+	  <i class="icon-white icon-edit"></i> Editar 
+          <% end %>
+        </div>
+
+        <div style="display:inline; padding-right: 4px;">
+        <% if documento.estado == "COMPLETO" %>
+          <%= link_to "/documentos/descargar/#{ documento.id}", { :class => 'btn-small btn-info', :style => "color:white;"} do %> 
+	    <i class="icon-white icon-download"></i> Descargar 
+          <% end %>
+        <% end %>
+        </div>
+    </div>
+
+    <div class="span4" style="margin:0px;" > 
+      <div class="span2" style="display:inline; padding-right: 4px; width:100px">
+        <%= link_to documento, { :class => 'btn-small btn-danger', :style => "color:white;", method: :delete,  
+	  data: { confirm: "¿Estas seguro que quieres eliminar #{documento.titulo}?"} } do %> <i class="icon-white icon-remove"></i>
+	  Eliminar 
+        <% end %>
+      </div>
+      <div class="span2" style="display:inline; padding-right: 2px; width:100px">
+      <% if documento.estado == "COMPLETO" %>
+        <% if documento.estado_documento.id == 1 %>
+          <%= link_to indexar_documento_path(documento), { :class => 'btn-small btn-primary', :style => "color:white;" } do %>
+            <i class="icon-white icon-list"></i> Indexar
+          <% end %>
+        <% end %>
+      <% end %>
+      </div>
+    </div>
+
+     </td>
+  </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @documentos } %>
+
+<%= render 'shared/modal' %>
+

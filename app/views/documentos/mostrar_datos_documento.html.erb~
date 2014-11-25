@@ -1,0 +1,107 @@
+<h3><%= @documento.titulo %></h3>
+
+<p>
+  <b>Escuela:</b>
+  <%= @documento.escuela.descripcion %>
+</p>
+
+<p>
+  <b>Tipo de documento:</b>
+  <%= @documento.tipo_documento.descripcion %>
+</p>
+
+<p>
+  <b>Fecha de publicacion:</b>
+  <%= @documento.fecha_publicacion %>
+</p>
+
+<% if @documento.personas_jurado.any? %>
+  <p>
+    <b><%= pluralizar("Area:","Areas:", @documento.areas.length) %></b>
+  </p>
+  <ul>
+    <% @documento.areas.each do |area| %>
+      <li>
+        <%= area.descripcion %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<p>
+  <b><%= pluralizar("Autor:","Autores:", @documento.personas_autor.length) %></b>
+</p>
+<ul>
+  <% @documento.personas_autor.each do |autor| %>
+    <li>
+     <%= autor.nombre_completo %>
+    </li>
+  <% end %>
+</ul>
+
+<% if @documento.personas_tutor.any? %>
+  <p>
+    <b><%= pluralizar("Tutor:","Tutores:", @documento.personas_tutor.length) %></b>
+  </p>
+  <ul>
+    <% @documento.personas_tutor.each do |tutor| %>
+      <li>
+       <%= tutor.nombre_completo %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if @documento.personas_jurado.any? %>
+  <p>
+    <b>Jurados:</b>
+  </p>
+  <ul>
+    <% @documento.personas_jurado.each do |jurado| %>
+      <li>
+       <%= jurado.nombre_completo %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<p>
+  <b>Idioma:</b>
+  <%= @documento.idioma.descripcion %>
+</p>
+
+<p>
+  <b>Palabras clave:</b>
+  <%= @documento.palabras_clave %>
+</p>
+
+<% if @documento.calificacion > 0 %>
+  <p>
+    <b>Calificacion:</b>
+    <%= @documento.calificacion %> 
+  </p>
+<% end %>
+
+<% if @documento.reconocimientos.any? %>
+  <p>
+    <b><%= pluralizar("Reconocimiento","Reconocimientos", @documento.reconocimientos.length) %>:</b>
+  </p>
+
+  <ul>
+  <% @documento.reconocimientos.each do |reconocimiento| %>
+    <li><%= reconocimiento.descripcion %></li>
+  <% end %>
+  </ul>
+<% end %>
+
+
+<% if @documento.visibilidad.descripcion == 'PUBLICO' %>
+  <a href="<%= @documento.publicacion.url %>"><b> Descargar </b></a>
+<% end %>
+
+<p>
+  <b>Resumen:</b>
+  <%= @documento.resumen %>
+</p>
+
+

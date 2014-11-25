@@ -1,0 +1,223 @@
+<script>
+
+function cargar_documento(doc_id){
+ $("#doc-info-body").load("/documentos/"+doc_id+"/datos_documento" , function(response,status,xhr){
+ });
+
+}
+</script>
+
+<% titulo 'Busqueda Avanzada' %>
+
+<form class="form-horizontal" action="busqueda_avanzada" method="get">
+
+<fieldset>
+  <legend>Personas</legend>
+
+  <div class="control-group">
+    <label for="autor-busqueda-avanzada" class="control-label" style="display: inline;">Autor</label>
+    <div class="controls">
+      <input id="autor-busqueda-avanzada" data-provide="typeahead" autocomplete="off" class="input-xxlarge" type="text"/> 
+      <input id="autor_id" name="autor_id" type="hidden"/>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="tutor-busqueda-avanzada" data-provide="typeahead" class="control-label" style="display: inline;">Tutor</label>
+    <div class="controls">
+      <input id="tutor-busqueda-avanzada" data-provide="typeahead" autocomplete="off" class="input-xxlarge" type="text" /> 
+      <input id="tutor_id" name="tutor_id" type="hidden"/>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="jurado-busqueda-avanzada" data-provide="typeahead" class="control-label" style="display: inline;">Jurado</label>
+    <div class="controls">
+      <input id="jurado" autocomplete="off" class="input-xxlarge" type="text" /> 
+      <input id="jurado_id" name="jurado_id" type="hidden"/>
+    </div>
+  </div>
+
+</fieldset>
+
+<fieldset>
+  <legend>Terminos</legend>
+
+  <div class="control-group">
+    <label for="terminos_titulo" class="control-label" style="display: inline;">Titulo</label>
+    <div class="controls">
+      <input id="terminos_titulo" name="terminos_titulo" class="input-xxlarge" type="text" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="terminos_contenido" class="control-label" style="display: inline;">Contenido</label>
+    <div class="controls">
+      <input id="terminos_contenido"  name="terminos_contenido" class="input-xxlarge" type="text" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="terminos_resumen" class="control-label" style="display: inline;">Resumen</label>
+    <div class="controls">
+      <input id="terminos_resumen" name="terminos_resumen" class="input-xxlarge" type="text" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="terminos_palabras_clave" class="control-label" style="display: inline;">Palabras clave</label>
+    <div class="controls">
+      <input id="terminos_palabras_clave" name="terminos_palabras_clave" class="input-xxlarge" type="text" />
+    </div>
+  </div>
+
+</fieldset>
+
+<fieldset>
+  <legend>Documentos</legend>
+
+<div style="width:50%:display:inline">
+  <div class="control-group">
+    <label for=doc_tipo class="control-label" style="display: inline;">Tipo de documento</label>
+    <div class="controls">
+      <%= select('doc', 'tipo' ,TipoDocumento.all.collect {|t| [ t.descripcion, t.id ] }, { :include_blank => true }) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" style="display: inline;">Fecha</label>
+    <div class="controls">
+      Desde
+     <%= date_select 'fecha', 'desde', {:start_year => 2000, :end_year => Time.now.year, :discard_month => true, :discard_day => true, :include_blank => true}, {:style => 'width:70px'} %>
+     Hasta
+     <%= date_select 'fecha', 'hasta', {:start_year => 2000, :end_year => Time.now.year, :discard_month => true, :discard_day => true, :include_blank => true}, {:style => 'width:70px'} %>
+    </div>
+  </div>
+</div>
+
+<div style="width:50%:display:inline">
+
+  <div class="control-group">
+    <label for="doc_escuela" class="control-label" style="display: inline;">Escuela</label>
+    <div class="controls">
+      <%= select('doc', 'escuela' , Escuela.all.collect {|e| [ e.descripcion, e.id ] }, { :include_blank => true }) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label for="doc_idioma" class="control-label" style="display: inline;">Idioma</label>
+    <div class="controls">
+      <%= select('doc', 'idioma' , Idioma.all.collect {|i| [ i.descripcion, i.id ] }, { :include_blank => true }) %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox"><%= check_box_tag('reconocimientos') %>Sólo documentos con reconocimientos</label>   
+    </div>
+  </div>
+
+</div>
+
+</fieldset>
+
+  <div class="control-group">
+    <div class="controls">
+      
+      <button type="submit" class="btn btn-info" style=""> <i class="icon-white icon-search"></i> Buscar</button>
+    </div>
+  </div>
+
+
+</form>
+
+<fieldset>
+  <legend>Resultados</legend>
+
+<% unless @documentos.nil? %>
+
+  <!-- Conteo de resultados -->
+  <% render :partial => 'mensaje_conteo_resultados', :locals => { :documentos_size => @documentos_size } %>
+
+  <% @documentos.uniq.each do |documento| %>
+    <div class="resultado-fila" >
+      <% if documento.visibilidad.id == 1 %>
+            <a class="btn-link desc" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+              <%= raw documento.titulo %>
+            </a>
+      <% else %>
+            <a class="btn-link desc-gray" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#">
+              <%= raw documento.titulo %>
+      <% end %>
+      <div class="resultado-fila-detalles" >
+
+        <div style="display:inline-block; width:80%">
+          <!-- Detalles (aqui va los datos del documento) -->
+          <table style="border:0px;">
+          <tbody>
+          <tr><td style="padding:0px;"><b><%= documento.escuela.descripcion.capitalize %></b></td>
+              <td style="padding:0px;"><%= documento.tipo_documento.descripcion.capitalize %></td>
+          </tr>
+          <tr><td style="padding:0px;"><b><%= pluralizar('Autor','Autores', documento.personas_autor.size) %></b></td>
+              <td style="padding:0px;">
+              <% documento.personas_autor.each do |persona| %>
+                <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+              <% end %>
+              </td>
+          </tr>
+          <% if documento.personas_tutor.any? %>
+            <tr>
+              <td style="padding:0px;"><b><%= pluralizar('Tutor','Tutores', documento.personas_tutor.size) %></b></td>
+              <td style="padding:0px;">
+              <% documento.personas_tutor.each do |persona| %>
+                <%= "-#{persona.nombre_completo.split(' ').map(&:capitalize).join(' ')}" %>
+               <% end %>
+              </td>
+            </tr>
+          <% end %>
+          <tr> <td style="padding:0px;"><b>Fecha</b></td>
+               <td style="padding:0px;"><%= "#{documento.fecha_publicacion.day}-#{documento.fecha_publicacion.month}-#{documento.fecha_publicacion.year}"%></td>
+          </tr>
+          <% if documento.visibilidad.descripcion == "PUBLICO" %>
+            <tr><td style="padding:0px;"><b>Descargas</b></td>
+               <td style="padding:0px;"> <%= documento.descargas %></td>
+            </tr>
+          <% end %>
+          </tbody>
+          </table>
+          <!-- Fin Detalles -->
+        </div>
+        <div style="display:inline; text-align:right; width:20%">
+
+        <button class="btn-info btn-mini" data-toggle="modal" data-target="#doc-info" onclick="cargar_documento(<%= documento.id %>)" href="#"> 
+          <i class="icon-white icon-search"></i> Ver 
+        </button>
+
+        <% if documento.visibilidad.descripcion == 'PUBLICO' %>
+          <button class="btn-info btn-mini" onclick="location.href='/documentos/descargar/<%= documento.id %>'">
+            <i class="icon-white icon-download"></i> Descargar 
+          </button>
+        <% end %>
+
+        </div>
+
+      </div>
+    </div>
+  <% end %>
+
+
+<!-- Mensaje de Aviso -->
+<span class="label label-important" style="margin-top:30px"><%= @ingresar_terminos %></span><br /><br /><br /><br /><br />
+
+<!-- Paginacion -->
+<%= render :partial => 'shared/paginacion', :locals => { :coleccion => @documentos } %>
+
+
+</fieldset>
+<% end %>
+
+<%= render 'shared/modal' %>
+
+<% @query0 %><br/>
+<% @query %><br/>
+<% @documentos_query %>

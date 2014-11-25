@@ -1,0 +1,25 @@
+<%= form_for(@area, :html => {:class => "form_horizontal"}) do |f| %>
+
+  <%= render :partial => 'shared/errores', :locals => { :modelo => @area } %>'
+
+  <div class="control-group">
+    <%= f.label :descripcion, :style => "", :class => "control-label", :style => "width:20%" %>
+    <div class="controls">
+      <%= f.text_field :descripcion, :style => "width:70%"  %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <%= f.label :escuela %>
+    <div class="controls">
+      <%= f.select("escuela_id", Escuela.all.collect {|p| [ p.descripcion, p.id ] }) %>
+    </div>
+  </div>
+
+  <div class="control-group btn-submit" style = "">
+    <%= link_to areas_path, { :class => 'btn-black', :style => "color:white"} do %>
+      <i class="icon-white icon-remove"></i> Cancelar 
+    <% end %> 
+    <%= f.submit 'Guardar', :class => 'btn btn-info', :style => "color:white; margin-left: 5px"  %>
+  </div>
+<% end %>

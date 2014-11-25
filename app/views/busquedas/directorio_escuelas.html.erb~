@@ -1,0 +1,27 @@
+<%= titulo 'Directorio' %>
+
+<ul class="nav nav-tabs">
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+      Documentos por Escuela
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <!-- links -->
+	<%= link_to 'Biologia',    'escuelas/biologia' 	  %>
+	<%= link_to 'Computacion', 'escuelas/computacion' %>
+	<%= link_to 'Fisica',      'escuelas/fisica' 	  %>
+	<%= link_to 'Geoquimica',  'escuelas/geoquimica'  %>
+	<%= link_to 'Matematica',  'escuelas/matematica'  %>
+	<%= link_to 'Quimica',     'escuelas/quimica' 	  %>
+    </ul>
+  </li>
+</ul>
+
+
+
+
+
+<%= link_to directorio_path, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-arrow-left"></i> Volver 
+<% end %>

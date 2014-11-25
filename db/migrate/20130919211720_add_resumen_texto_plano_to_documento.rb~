@@ -1,0 +1,5 @@
+class AddResumenTextoPlanoToDocumento < ActiveRecord::Migration
+  def change
+    add_column :documentos, :resumen_texto_plano, :string
+  end
+end

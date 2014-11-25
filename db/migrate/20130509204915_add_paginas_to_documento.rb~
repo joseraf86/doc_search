@@ -1,0 +1,5 @@
+class AddPaginasToDocumento < ActiveRecord::Migration
+  def change
+    add_column :documentos, :paginas, :integer
+  end
+end

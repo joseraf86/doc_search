@@ -1,0 +1,7 @@
+<% titulo 'Editar Area' %>
+
+<%= render 'form' %>
+
+<%= link_to @area, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-search"></i> Ver 
+<% end %>

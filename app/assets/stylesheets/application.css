@@ -1,0 +1,179 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require_self
+ *= requiere bootstrap
+ *= require_tree .
+ */
+
+input.number_field {
+  width: 100px;
+  text-align: right;
+}
+
+div.tabla, table.table {
+  background: #EEE; 
+  border-radius: 10px; 
+  -webkit-border-radius: 12px; 
+  -moz-border-radius: 10px; 
+  box-shadow: 3px 3px 1px #AAA;
+}
+
+table.table thead.head-blue tr th {
+  background-color: #069;
+  background-image:-moz-linear-gradient(center top , rgb(0, 62, 113), rgb(0, 102, 153));
+  color: rgb(103, 205, 235);
+  text-transform: uppercase;
+}
+
+table.table tbody tr:nth-child(even) td, table.table tbody tr.bg-viejo:nth-child(even) td {
+  background-color: rgb(249,249,255);
+}
+
+table.table tbody tr:nth-child(odd) td, table.table tbody tr.bg-viejo:nth-child(odd) td{
+  background-color: rgb(240,240,245);
+}
+
+table.table tbody tr.bg-nuevo:nth-child(even) td {
+  background-color: #BDF;
+}
+
+table.table tbody tr.bg-nuevo:nth-child(odd) td {
+  background-color: #CDF;
+}
+
+
+table.table thead.head-blue tr th:first-child {
+  -webkit-border-top-left-radius: 10px;
+  -moz-border-radius-topleft: 10px;
+  border-top-left-radius: 10px;
+}
+
+table.table thead.head-blue tr th:last-child {
+  -webkit-border-top-right-radius: 10px;
+  -moz-border-radius-topright: 10px;
+  border-top-right-radius: 10px;
+}
+
+.resultado-fila
+{
+
+  background: #EEE; 
+  border-radius: 10px; 
+  -webkit-border-radius: 12px; 
+  -moz-border-radius: 10px; 
+  box-shadow: 3px 3px 1px #AAA;
+  margin-bottom:14px;
+
+}
+
+.resultado-fila h3, .resultado-fila h4
+{
+  padding: 6px;
+}
+
+.resultado-fila-detalles
+{
+  background: #DDD; 
+  border-bottom-right-radius: 8px; 
+  -webkit-border-bottom-right-radius: 10px; 
+  -moz-border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px; 
+  -webkit-border-bottom-left-radius: 10px; 
+  -moz-border-bottom-left-radius: 8px;
+  padding: 6px;
+}
+
+a.desc, a.desc:visited, td.desc
+{
+  color:#36C; font-weight: bold;
+}
+
+a.desc-gray, a.desc-gray:visited
+{
+  color:#777; font-weight: bold;
+}
+
+
+div.grid-row:nth-child(even){
+ background-color:#EEF;
+ display: block;
+}
+  
+div.grid-row:nth-child(odd){
+ background-color:white;
+ display: block;
+}
+  
+.grid-row div.labels{
+ display: inline-block;
+ font-weight: bold;
+ width:15%;
+ padding: 3px 0;
+  }
+
+.grid-row div.values{
+ display: inline-block;
+  }
+
+.btn-black {
+  color:white;
+  background-image:-moz-linear-gradient(center top , rgb(110, 110, 110), rgb(0, 0, 0));
+  padding:6px;
+  border-radius: 2px; 
+  -webkit-border-radius: 2px; 
+  -moz-border-radius: 2px;
+  margin-right:4px;
+}
+
+.btn-submit {
+  text-align:right; 
+  width:70%
+}
+
+.txt-wh {
+  color:white;
+}
+
+div.pagination em.current {border:1px solid gray;color:red;margin:6px}
+
+.apple_pagination {
+  background: #f1f1f1;
+  border: 1px solid #e5e5e5;
+  text-align: center;
+  padding: 1em;
+  cursor: default; }
+  .apple_pagination a, .apple_pagination span {
+    padding: 0.2em 0.3em; }
+  .apple_pagination .disabled {
+    color: #aaaaaa; }
+  .apple_pagination .current {
+    font-style: normal;
+    font-weight: bold;
+    background-color: #bebebe;
+    display: inline-block;
+    width: 1.4em;
+    height: 1.4em;
+    line-height: 1.5;
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
+    text-shadow: rgba(255, 255, 255, 0.8) 1px 1px 1px; }
+  .apple_pagination a {
+    text-decoration: none;
+     }
+    .apple_pagination a:hover, .apple_pagination a:focus {
+      text-decoration: underline; 
+}
+
+input.bc_radio {
+  width: 300px;
+}
+

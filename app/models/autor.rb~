@@ -1,0 +1,6 @@
+class Autor < ActiveRecord::Base
+  belongs_to :persona
+  belongs_to :documento
+  validates :documento_id, :persona_id => :presence
+  attr_accessible :persona_id
+end

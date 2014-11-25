@@ -1,0 +1,7 @@
+<% titulo 'Editar Tipo de Documento' %>
+
+<%= render 'form' %>
+
+<%= link_to @tipo_documento, { :class => 'btn-black', :style => "color:white"} do %>
+  <i class="icon-white icon-search"></i> Ver 
+<% end %>

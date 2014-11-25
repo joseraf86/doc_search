@@ -1,0 +1,20 @@
+<% titulo 'Premio' %>
+
+<div class="grid-row" >
+  <div class="labels">Descripcion:</div> 
+  <div class="values"><%=  @premio.descripcion %></div> 
+</div>
+
+<br />
+
+<nav>
+  <%= link_to premios_path, { :class => 'btn-black', :style => "color:white;margin-right:4px;"} do %>
+    <i class="icon-white icon-arrow-left"></i> Volver 
+  <% end %>
+  <%= link_to '/admin', { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-book"></i> Ir a Admin 
+  <% end %>
+  <%= link_to edit_premio_path(@premio), { :class => 'btn-black', :style => "color:white"} do %>
+    <i class="icon-white icon-edit"></i> Editar 
+  <% end %>
+</nav>

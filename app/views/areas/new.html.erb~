@@ -1,0 +1,5 @@
+<% titulo 'Crear Area' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', areas_path %>

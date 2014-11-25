@@ -1,0 +1,10 @@
+<% if modelo.errors.any? %>
+  <div id="error_explanation">
+    <h2><%=  "#{modelo.errors.count} #{pluralizar("error", "errores", modelo.errors.count)}" %> <%= "No se pudo guardar #{modelo.class.model_name.human}" %> </h2>
+    <ul>
+    <% modelo.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>

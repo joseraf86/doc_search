@@ -1,0 +1,7 @@
+<% unless documentos_size == 0 %>
+   <% if documentos_size == 1 %>
+      <span class="label label-info" style="margin-top:30px"><%= "#{documentos_size} documento encontrado" %></span><br /><br /><br />
+    <% else %>
+      <span class="label label-info" style="margin-top:30px"><%= "#{documentos_size} documentos encontrados" %></span><br /><br /><br />
+    <% end %>
+<% end %>

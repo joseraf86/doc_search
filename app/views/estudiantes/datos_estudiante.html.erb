@@ -1,0 +1,49 @@
+
+<div class="grid-row" >
+  <div class="values"><h3><%=  @estudiante.persona.nombre_completo %></h3></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Cedula:</div> 
+  <div class="values"><%=  @estudiante.persona.cedula %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Escuela:</div> 
+  <div class="values"><%=  @estudiante.escuela.descripcion %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Grado:</div> 
+  <div class="values"><%=  @estudiante.grado.descripcion %></div> 
+</div>
+
+<% unless @estudiante.mencion.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Mencion:</div> 
+    <div class="values"><%=  @estudiante.mencion.descripcion %></div> 
+  </div>
+<% end %>
+
+<div class="grid-row" >
+  <div class="labels">Prom. gen:</div> 
+  <div class="values"><%=  @estudiante.promedio_general %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Prom. pond:</div> 
+  <div class="values"><%=  @estudiante.promedio_ponderado %></div> 
+</div>
+
+<div class="grid-row" >
+  <div class="labels">Eficiencia:</div> 
+  <div class="values"><%=  @estudiante.eficiencia %></div> 
+</div>
+
+<% unless @estudiante.premio.nil? %>
+  <div class="grid-row" >
+    <div class="labels">Premio:</div> 
+    <div class="values"><%=  @estudiante.premio.descripcion %></div> 
+  </div>
+<% end %>
+

@@ -1,0 +1,2 @@
+module MencionsHelper
+end

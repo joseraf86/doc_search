@@ -1,0 +1,5 @@
+<% titulo 'Nueva Mencion' %>
+
+<%= render 'form' %>
+
+<%= link_to 'volver', mencions_path %>

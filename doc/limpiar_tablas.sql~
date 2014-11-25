@@ -1,0 +1,10 @@
+truncate table documento;
+truncate table cindex;
+truncate table tindex;
+truncate table rindex;
+truncate table clindex;
+truncate table autor;
+truncate table tutor;
+truncate table jurado;
+truncate table contenido;
+truncate table terminos;
